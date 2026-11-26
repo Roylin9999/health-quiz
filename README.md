@@ -29,3 +29,9 @@ wrangler.jsonc      Worker 設定（D1 繫結）
 - 顧客端只拿得到店舖的公開資訊（店舖名稱、會員編號、LINE ID），拿不到店主 Email。
 - 每位店主登入後只看得到自己顧客的紀錄。
 - 寄信服務：FormSubmit。第一次使用請在店主專區按「寄送測試信」，到信箱點 Activate。
+
+## 串接蘇打餅（挑戰計劃）
+
+`wrangler.jsonc` 已經設定好：店舖 `dkstore` 的顧客結果，會在背後送到蘇打餅（`SYNC_STORE`、`SYNC_URL`，並用服務繫結 `PLAN` 連到 challenge-plan）。
+只要在兩個 Worker 都新增同一個密鑰 `INBOX_KEY`（設定 → 變數和密鑰 → 類型選「密鑰」）就會開始傳。
+沒設定 `INBOX_KEY` 時不會傳，其他功能照常。要讓更多店舖送過去，把 `SYNC_STORE` 改成用逗號隔開，例如 `dkstore,abcstore`。

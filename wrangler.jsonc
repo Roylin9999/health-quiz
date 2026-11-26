@@ -2,6 +2,8 @@
   "name": "health-quiz",
   "main": "src/worker.js",
   "compatibility_date": "2025-09-01",
+  "vars": { "SYNC_STORE": "dkstore", "SYNC_URL": "https://challenge-plan.joy23419.workers.dev" },
+  "services": [ { "binding": "PLAN", "service": "challenge-plan" } ],
   "assets": { "directory": "./public", "binding": "ASSETS" },
   "d1_databases": [
     { "binding": "DB", "database_name": "health-quiz-db", "database_id": "65c5332d-a95d-4773-ac4a-5a29f7a977c8" }

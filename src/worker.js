@@ -71,6 +71,26 @@ async function newToken(env, slug) {
   return token;
 }
 
+// 把顧客結果送到店主的挑戰計劃網站（例如蘇打餅）的收件匣，在背後進行、顧客看不到
+// 設定：wrangler.jsonc 的 vars（SYNC_STORE 店舖、SYNC_URL 網址）、services 的 PLAN ＋ 密鑰 INBOX_KEY（兩邊設成一樣）
+async function syncToPlan(env, slug, r) {
+  if (!env.SYNC_URL || !env.INBOX_KEY) return false;
+  const stores = String(env.SYNC_STORE || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
+  if (!stores.includes(String(slug).toLowerCase())) return false;
+  const a = r.answers || {}, pick = k => a[k] == null ? [] : [].concat(a[k]).map(x => clip(x, 30));
+  const t = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+  // 同一個 Cloudflare 帳號的 Worker 互相呼叫要走服務繫結 PLAN（直接 fetch workers.dev 會被擋）
+  const go = env.PLAN ? (u, o) => env.PLAN.fetch(u, o) : fetch;
+  const res = await go(String(env.SYNC_URL).replace(/\/+$/, "") + "/api/inbox", {
+    method: "POST", signal: AbortSignal.timeout(6000),
+    headers: { "content-type": "application/json", "x-inbox-key": env.INBOX_KEY },
+    body: JSON.stringify({ id: `hq-${slug}-${r.id || Date.now()}`, store: slug, name: r.customer, date: t,
+      age: pick("你的年齡層是？")[0] || "", focus: r.focus, symptoms: pick("最近有感覺到以下哪些變化？"),
+      products: r.recs.map(x => x.name) })
+  });
+  return res.ok;
+}
+
 async function sendMail(to, data, origin) {
   const r = await fetch("https://formsubmit.co/ajax/" + encodeURIComponent(to), {
     method: "POST",
@@ -192,7 +212,8 @@ async function api(request, env, url, ctx) {
       emailed = await sendMail(owner.email, data, url.origin).catch(() => false);
       if (emailed && id) await env.DB.prepare("UPDATE results SET emailed = 1 WHERE id = ?").bind(id).run();
     }
-    return json({ ok: true, id, emailed, store: owner ? owner.slug : null });
+    const synced = owner ? await syncToPlan(env, owner.slug, { id, customer, focus, recs, answers }).catch(() => false) : false;
+    return json({ ok: true, id, emailed, synced, store: owner ? owner.slug : null });
   }
 
   // 管理者（Roy）：看全部店主與紀錄，需要密鑰 ADMIN_KEY
