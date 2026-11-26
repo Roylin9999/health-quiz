@@ -187,8 +187,8 @@ async function api(request, env, url, ctx) {
   if (m === "POST" && (mm = p.match(/^\/api\/owners\/([^/]+)\/test-mail$/))) {
     const o = await authOwner(request, env, decodeURIComponent(mm[1]));
     if (!o) return err(401, "請重新登入");
-    const data = { _subject: `【健康選品｜${o.slug}】測試信`, _template: "table", _captcha: "false",
-      "店舖": o.slug, "說明": "這是測試信。收到這封信代表顧客的測驗結果可以正常寄到你的信箱。" };
+    const data = { _subject: `【健康選品｜${o.display_name || o.slug}】測試信`, _template: "table", _captcha: "false",
+      "店主": o.display_name || o.slug, "店舖": o.slug, "說明": "這是測試信。收到這封信代表顧客的測驗結果可以正常寄到你的信箱。" };
     const ok = await sendMail(o.email, data, url.origin).catch(() => false);
     return json({ ok: true, sent: ok, mail: ok ? undefined : mailJob(o.email, data) });
   }
@@ -217,8 +217,8 @@ async function api(request, env, url, ctx) {
     const id = ins.meta?.last_row_id;
     let emailed = false, mailData = null;
     if (owner) {
-      const data = mailData = { _subject: `【健康選品｜${owner.slug}】${customer} 的測驗結果`, _template: "table", _captcha: "false",
-        "店舖": owner.slug, "顧客姓名": customer,
+      const data = mailData = { _subject: `【健康選品｜${owner.display_name || owner.slug}】${customer} 的測驗結果`, _template: "table", _captcha: "false",
+        "店主": owner.display_name || owner.slug, "店舖": owner.slug, "顧客姓名": customer,
         "測驗時間": new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei", hour12: false }),
         "保養重點": focus.join("、") };
       recs.forEach((r, i) => data[`推薦 ${i + 1}`] = `${r.name}（符合 ${r.match}%） ${r.url}`);

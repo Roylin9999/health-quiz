@@ -485,7 +485,10 @@ const linkFor = o => location.origin+location.pathname+"?"+new URLSearchParams({
 /* ---------- cloud mode: owners & results stored in the site's database ---------- */
 function sessions(){ try{ const l=JSON.parse(localStorage.getItem("hq:sessions")||"[]"); return Array.isArray(l)?l.filter(x=>x&&SLUG_RE.test(x.slug)&&x.token):[] }catch(e){return []} }
 function saveSessions(l){ try{localStorage.setItem("hq:sessions",JSON.stringify(l))}catch(e){} }
-function putSession(slug,token){ const l=sessions().filter(x=>x.slug.toLowerCase()!==slug.toLowerCase()); l.unshift({slug,token}); saveSessions(l); }
+function putSession(slug,token,name){ const l=sessions().filter(x=>x.slug.toLowerCase()!==slug.toLowerCase()); l.unshift({slug,token,name:name||""}); saveSessions(l); }
+/* 記住店主的稱呼，讓「這台裝置的店主」清單顯示名字而不是店舖代號 */
+function nameSession(slug,name){ const l=sessions(); const x=l.find(x=>x.slug.toLowerCase()===slug.toLowerCase()); if(x&&x.name!==(name||"")){ x.name=name||""; saveSessions(l); } }
+const ownerLabel = o => o.name || o.slug;
 function dropSession(slug){ saveSessions(sessions().filter(x=>x.slug.toLowerCase()!==slug.toLowerCase())); }
 const authH = t=>({authorization:"Bearer "+t});
 const storeLink = slug => location.origin+location.pathname+"?"+new URLSearchParams({s:slug}).toString();
@@ -547,7 +550,7 @@ function cloudHome(view, prefill){
   const body=document.getElementById("tabbody");
   if(tab==="list"){
     body.innerHTML=`<div class="olist">${list.map((x,ix)=>`<div class="orow">
-      <button class="opick" data-ix="${ix}"><span class="oname">${esc(x.slug)}</span><span class="omail">已登入</span></button>
+      <button class="opick" data-ix="${ix}"><span class="oname">${esc(ownerLabel(x))}</span><span class="omail">${x.name?`${esc(x.slug)}・`:""}已登入</span></button>
       <div class="oact"><button class="btn" data-ix="${ix}">開啟</button><button class="textlink" data-rm="${ix}">從這台裝置移除</button></div></div>`).join("")}</div>`;
     body.querySelectorAll("[data-ix]").forEach(b=>b.onclick=()=>dashboard(list[+b.dataset.ix]));
     body.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{ dropSession(list[+b.dataset.rm].slug); cloudHome(); });
@@ -562,7 +565,7 @@ function cloudHome(view, prefill){
       e.preventDefault(); const er=document.getElementById("e-login"); er.textContent="";
       const slug=document.getElementById("lslug").value.trim().replace(/^.*markettaiwan\.com\.tw\//,"").replace(/[/?#].*$/,"");
       try{ const j=await api("/api/owners/login",{method:"POST",body:JSON.stringify({slug,password:document.getElementById("lpw").value})});
-        putSession(j.owner.slug,j.token); dashboard({slug:j.owner.slug,token:j.token},j.owner);
+        putSession(j.owner.slug,j.token,j.owner.name); dashboard({slug:j.owner.slug,token:j.token},j.owner);
       }catch(x){ er.textContent=x.msg||"登入失敗，請稍後再試"; }
     };
   } else {
@@ -572,7 +575,7 @@ function cloudHome(view, prefill){
       e.preventDefault(); const f=readOwnerFields(true); if(!f) return;
       const er=document.getElementById("e-create"); er.textContent="";
       try{ const j=await api("/api/owners",{method:"POST",body:JSON.stringify(f)});
-        putSession(j.owner.slug,j.token); dashboard({slug:j.owner.slug,token:j.token},j.owner);
+        putSession(j.owner.slug,j.token,j.owner.name); dashboard({slug:j.owner.slug,token:j.token},j.owner);
       }catch(x){ er.textContent=x.msg||"建立失敗，請稍後再試"; }
     };
   }
@@ -586,11 +589,12 @@ async function dashboard(sess, owner){
     try{ owner=(await api("/api/owners/"+encodeURIComponent(sess.slug),{headers:authH(sess.token)})).owner; }
     catch(x){ if(x.code===401){ dropSession(sess.slug); toast("登入已過期，請重新登入"); return cloudHome("login",sess.slug);} app.innerHTML=`<section class="setup"><p class="hint">讀取失敗，請稍後再試。</p><div><button class="back" id="sb">← 返回</button></div></section>`; document.getElementById("sb").onclick=()=>cloudHome(); return; }
   }
+  nameSession(owner.slug, owner.name);
   const link=storeLink(owner.slug);
   let svg=""; try{ if(window.qrcode){ const q=qrcode(0,"M"); q.addData(link); q.make(); svg=q.createSvgTag({cellSize:8,margin:2,scalable:true}); } }catch(e){}
   app.innerHTML=`<section class="setup fade">
-    <span class="label">STORE · ${esc(owner.slug)}</span>
-    <h2 tabindex="-1">${esc(owner.slug)} 的店主專區</h2>
+    <span class="label">STORE · ${esc(ownerLabel(owner))}</span>
+    <h2 tabindex="-1">${esc(ownerLabel(owner))} 的店主專區</h2>
     <div class="qrv" style="padding:0">
       <div class="qrbox">${svg||`<p class="note">QR Code 載入失敗，請重新整理，或直接複製下方連結。</p>`}</div>
       <p class="note">請顧客用手機相機掃描，就能在自己的手機上作答。</p>
@@ -619,7 +623,8 @@ async function dashboard(sess, owner){
     catch(x){ st.textContent=x.code===401?"請重新登入":("寄信沒有成功"+(x&&x.message?`：${x.message}`:"")+"。請確認 Email 拼字正確，或稍後再試。"); } };
   document.getElementById("ef").onsubmit=async e=>{ e.preventDefault(); const f=readOwnerFields(false); if(!f) return;
     const es=document.getElementById("es"); es.className="status"; es.textContent="儲存中…";
-    try{ owner=(await api("/api/owners/"+encodeURIComponent(owner.slug),{method:"PUT",headers:authH(sess.token),body:JSON.stringify(f)})).owner; es.className="status ok"; es.textContent="已儲存"; document.getElementById("pw").value=""; }
+    try{ owner=(await api("/api/owners/"+encodeURIComponent(owner.slug),{method:"PUT",headers:authH(sess.token),body:JSON.stringify(f)})).owner; es.className="status ok"; es.textContent="已儲存"; document.getElementById("pw").value=""; nameSession(owner.slug, owner.name);
+      app.querySelector("h2").textContent=`${ownerLabel(owner)} 的店主專區`; app.querySelector(".setup .label").textContent=`STORE · ${ownerLabel(owner)}`; }
     catch(x){ es.textContent=x.msg||"儲存失敗"; } };
   try{
     const {results}=await api(`/api/owners/${encodeURIComponent(owner.slug)}/results`,{headers:authH(sess.token)});
