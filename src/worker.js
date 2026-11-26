@@ -218,6 +218,13 @@ export default {
         return err(500, "伺服器發生錯誤");
       }
     }
-    return env.ASSETS.fetch(request);
+    const res = await env.ASSETS.fetch(request);
+    const ct = res.headers.get("content-type") || "";
+    if (/^text\/(html|css|plain)|javascript/.test(ct) && !/charset/i.test(ct)) {
+      const r = new Response(res.body, res);
+      r.headers.set("content-type", ct + "; charset=utf-8");
+      return r;
+    }
+    return res;
   }
 };
