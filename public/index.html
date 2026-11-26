@@ -64,13 +64,12 @@ h2:focus{outline:none}
 .steps3 div+div{padding-left:14px;border-left:1px solid var(--hair)}
 .steps3 b{font:500 26px/1 var(--f-num);color:var(--moss)}
 .steps3 span{font-size:14px;font-weight:500;color:var(--muted);line-height:1.5}
-.hero{position:relative;width:100%;max-width:360px;justify-self:center;aspect-ratio:3/3.6;border-radius:999px 999px 6px 6px;overflow:hidden;
-  border:1px solid var(--gold);box-shadow:0 0 0 6px var(--paper),0 0 0 7px var(--hair)}
-.hero img{width:100%;height:100%;object-fit:cover;object-position:50% 12%;display:block}
-.hero .sec{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:var(--paper);border:1px solid var(--gold);padding:8px 16px 6px;text-align:center;white-space:nowrap}
+.hero{position:relative;width:100%;max-width:340px;justify-self:center}
+.hero img{width:100%;height:auto;display:block;-webkit-mask-image:linear-gradient(#000 78%,transparent);mask-image:linear-gradient(#000 78%,transparent)}   /* 保持原圖比例，不裁切 */
+.hero .sec{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);background:var(--paper);border:1px solid var(--gold);padding:8px 16px 6px;text-align:center;white-space:nowrap}
 .hero .sec b{font:600 30px/1 var(--f-num);color:var(--moss)}
 .hero .sec span{display:block;font:600 11px/1.4 var(--f-sans);letter-spacing:.3em;color:var(--gold)}
-@media (max-width:680px){.intro{grid-template-columns:1fr;gap:24px}.hero{max-width:250px;order:-1}}
+@media (max-width:680px){.intro{grid-template-columns:1fr;gap:24px}.hero{max-width:280px;order:-1}}
 /* question */
 .q{display:flex;flex-direction:column;gap:28px;max-width:680px;margin:0 auto;width:100%;padding-block:clamp(8px,3vw,32px)}
 .prog{display:flex;align-items:center;gap:16px}
@@ -85,11 +84,11 @@ h2:focus{outline:none}
 .opts.grid .opt{border-bottom:1px solid var(--hair)}
 @media (max-width:560px){.opts.grid{grid-template-columns:1fr}}
 .opt{appearance:none;background:transparent;border:0;border-bottom:1px solid var(--hair);text-align:left;color:var(--ink);
-  font:500 18px/1.5 var(--f-sans);padding:18px 6px;cursor:pointer;display:flex;gap:18px;align-items:center;min-width:0;transition:padding .2s,background .2s}
+  font:500 18px/1.5 var(--f-sans);padding:18px 6px;cursor:pointer;display:flex;gap:18px;align-items:center;min-width:0;transition:background .2s,box-shadow .2s}
 .opt:hover{padding-left:14px;background:var(--paper)}
 .opt .k{flex:none;width:28px;height:28px;border:1px solid var(--hair);border-radius:50%;display:grid;place-items:center;
   font:italic 500 16px/1 var(--f-num);color:var(--muted);transition:all .2s}
-.opt[aria-pressed="true"]{background:var(--paper);padding-left:14px}
+.opt[aria-pressed="true"]{background:var(--paper);box-shadow:inset 3px 0 0 var(--gold)}
 .opt[aria-pressed="true"] .k{background:var(--moss);border-color:var(--moss);color:var(--moss-ink);font-style:normal}
 .opt small{display:block;color:var(--muted);font-size:14px;font-weight:400}
 .nav{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
@@ -800,7 +799,8 @@ function render(){
   setTimer(`QUESTION ${String(i+1).padStart(2,"0")}`);
   const sel = k => q.multi ? (cur||[]).includes(k) : cur===k;
   const last = i===total-1;
-  app.innerHTML = `<section class="q fade">
+  const fresh = render._last!==q.id; render._last=q.id;   /* 只有換題時才播淡入動畫，點選答案不會整頁抖動 */
+  app.innerHTML = `<section class="q${fresh?" fade":""}">
     <div class="prog"><span class="n">${String(i+1).padStart(2,"0")}<small> / ${String(total).padStart(2,"0")}</small></span><div class="bar"><i style="width:${((i+1)/total*100).toFixed(1)}%"></i></div></div>
     <div class="qhead"><h2 id="qt">${esc(q.title)}</h2>${q.hint?`<p class="hint">${esc(q.hint)}</p>`:""}</div>
     <div class="opts ${q.opts.length>6?"grid":""}" role="group" aria-labelledby="qt">
@@ -826,8 +826,8 @@ function pick(q,k){
     render();
     const b=app.querySelector(`.opt[data-k="${k}"]`); if(b) b.focus({preventScroll:true});
   } else {
-    ans[q.id]=k; render();   /* 每一題都一樣：選好後按「下一題」，不自動跳頁 */
-    const b=app.querySelector(`.opt[data-k="${k}"]`); if(b) b.focus({preventScroll:true});
+    ans[q.id]=k; render();   /* 單選題：點了就自動到下一題 */
+    clearTimeout(pick._t); pick._t=setTimeout(()=>go(i+1),260);
   }
 }
 
