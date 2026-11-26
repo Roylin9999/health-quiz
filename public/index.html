@@ -141,7 +141,7 @@ h2:focus{outline:none}
 .mn{min-width:0;font-size:15px;line-height:1.5}
 .mn span{display:block;font-size:12px;color:var(--muted);letter-spacing:.1em}
 .more .price{font-size:19px}
-.closing{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch}
+.closing{display:grid;grid-template-columns:1fr;gap:20px;align-items:stretch}
 @media (max-width:680px){.closing{grid-template-columns:1fr}}
 .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .sync{display:flex;flex-direction:column;gap:10px;border:1px solid var(--hair);padding:20px}
@@ -839,12 +839,6 @@ function result(){
     ${R.rest.length?`<div class="more"><h3>也可以考慮</h3>${R.rest.map(r=>`<a href="${purl(r.p.h)}" target="_blank" rel="noopener"><span class="mini" style="${tintStyle(r)}">${art(FORM[r.p.h],"")}</span><span class="mn">${esc(r.p.n)}<span>${esc(NEED[r.main])}</span></span><span class="price">${money(r.p.p)}</span></a>`).join("")}</div>`:""}
     ${deal(R)}
     <div class="closing">
-      <div class="sync">
-        <span class="label">SYNC</span>
-        <strong style="font-family:var(--f-serif);font-weight:600">同步到會員網站</strong>
-        <p class="note">之後可以登入帳號，把這次的結果自動存到你的挑戰計畫與健康紀錄。目前結果已先保存在這台裝置上。</p>
-        <div class="row"><span class="pill">蘇打餅・即將開放</span><span class="pill">達爾文・即將開放</span></div>
-      </div>
       <div class="sync" style="justify-content:space-between">
         <span class="label">SHARE</span>
         <p class="note">${STORE?`<span class="status" id="ms">正在把結果傳送給你的顧問 ${esc(STORE.s)}…</span>`:"把結果複製下來，傳給你的健康顧問或朋友。"}</p>
