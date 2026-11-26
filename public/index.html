@@ -223,6 +223,144 @@ details.edit summary{cursor:pointer;font:600 17px var(--f-serif)}
 .fade{animation:fade .45s cubic-bezier(.2,.7,.2,1)}
 @keyframes fade{from{opacity:.2;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.fade{animation:none}.bar i,.opt{transition:none}}
+
+/* ===== 精修層：圓潤的形狀、柔和的層次、按壓回饋與小動畫 ===== */
+:root{--ease:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);--r:20px;--shadow:0 1px 2px rgba(74,54,20,.05),0 10px 30px -14px rgba(74,54,20,.22);--poster:#EFE0C8}
+html{-webkit-text-size-adjust:100%}
+body{background-image:linear-gradient(rgba(243,236,220,.94),rgba(243,236,220,.94)),url(img/pattern.webp)}
+button,a,input{-webkit-tap-highlight-color:transparent}
+button,a.btn,.opt{touch-action:manipulation}
+.wrap{gap:22px}
+header.top{background:none;padding-bottom:0}
+.timer{font-size:12px;letter-spacing:.2em;opacity:.75}
+.label{font-size:12px;letter-spacing:.22em}
+.match,.price,.prog .n{font-variant-numeric:lining-nums tabular-nums}
+.btn{border-radius:999px;padding:16px 30px;letter-spacing:.1em;justify-content:center;transition:background .25s,color .25s,transform .18s var(--ease),box-shadow .25s;box-shadow:0 8px 20px -12px rgba(52,80,63,.7)}
+.btn.ghost,.btn:disabled{box-shadow:none}
+.btn .arrow{transition:transform .25s var(--ease)}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn:hover{background:var(--moss);color:var(--moss-ink)}
+.btn.ghost:hover{background:transparent;color:var(--ink)}
+@media (hover:hover){.btn:not(.ghost):not(:disabled):hover{background:#2A4233}.btn:not(:disabled):hover .arrow{transform:translateX(4px)}}
+.btn:disabled{opacity:1;background:#D9D3BF;border-color:#D9D3BF;color:#8D8872}
+.btn:disabled:hover{background:#D9D3BF;color:#8D8872}
+.back,.textlink{transition:color .2s,transform .18s var(--ease)}
+.back:active,.textlink:active{transform:scale(.96)}
+.field input{border-radius:14px;padding:14px 16px;transition:border-color .2s,box-shadow .2s}
+.field input:focus{box-shadow:0 0 0 4px rgba(52,80,63,.12)}
+.prefix span{border-radius:14px 0 0 14px}.prefix input{border-radius:0 14px 14px 0}
+.out,.sync{border-radius:var(--r)}
+.toast{border-radius:999px;transition:opacity .25s,transform .35s var(--spring);transform:translate(-50%,12px)}
+.toast.on{transform:translate(-50%,0)}
+footer.note{font-size:12.5px;font-weight:400;line-height:1.85;text-align:center;opacity:.85;max-width:44em;margin:8px auto 0;padding-top:46px;background-size:min(360px,80%) auto}
+footer.note .textlink{font-size:13px}
+/* 首頁：一張完整的海報卡 */
+.intro2{padding-block:clamp(0px,2vw,24px)}
+.poster{background:var(--poster);border-radius:28px;overflow:hidden;box-shadow:var(--shadow);max-width:460px;margin:0 auto;display:flex;flex-direction:column}
+.poster .art{display:block;width:100%;height:auto;-webkit-mask-image:linear-gradient(#000 82%,transparent);mask-image:linear-gradient(#000 82%,transparent)}
+.ptext{display:flex;flex-direction:column;gap:18px;padding:0 26px 30px;margin-top:-14px;text-align:center;align-items:center;position:relative}
+.ptext h1{font-size:clamp(29px,7.6vw,38px);line-height:1.32}
+.ptext .lead{color:var(--muted);font-size:16px;font-weight:500;max-width:22em;line-height:1.8}
+.ptext .host{margin-top:2px}
+.ptext .field{width:100%;text-align:left}
+.ptext .field input{background:#FCF8EE}
+.ptext .note{font-size:13px;line-height:1.7;text-align:left}
+.ptext .btn{width:100%}
+.meta{display:flex;gap:12px;align-items:center;justify-content:center;font-size:13.5px;font-weight:500;letter-spacing:.1em;color:var(--muted)}
+.meta i{width:3px;height:3px;border-radius:50%;background:var(--gold)}
+.meta b{font:600 18px/1 var(--f-num);color:var(--moss);margin-right:3px;font-variant-numeric:lining-nums}
+@media (min-width:820px){.poster{max-width:860px;flex-direction:row;align-items:stretch}.poster .art{width:50%;height:auto;align-self:center;-webkit-mask-image:radial-gradient(closest-side,#000 88%,transparent);mask-image:radial-gradient(closest-side,#000 88%,transparent);margin:18px 0 18px 18px}
+  .ptext{flex:1;margin:0;padding:44px 44px 44px 20px;justify-content:center;text-align:left;align-items:flex-start}.ptext h1{font-size:40px}.ptext .btn{width:auto}}
+.rise>*{animation:rise .7s var(--ease) both}
+.rise>*:nth-child(2){animation-delay:.08s}.rise>*:nth-child(3){animation-delay:.16s}.rise>*:nth-child(4){animation-delay:.24s}.rise>*:nth-child(5){animation-delay:.32s}.rise>*:nth-child(n+6){animation-delay:.4s}
+.poster .art{animation:bloom 1.1s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes bloom{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:none}}
+/* 題目 */
+.q{max-width:540px;gap:22px;padding-block:4px 0;transition:opacity .17s ease,transform .17s ease}
+.q.leave{opacity:0;transform:translateX(-14px)}.q.leave.b{transform:translateX(14px)}
+.q.in>.qhead{animation:slidein .45s var(--ease) both}
+.q.in.b>.qhead{animation-name:slideinb}
+.q.in .opt{animation:rise .45s var(--ease) both;animation-delay:calc(60ms + min(var(--d),9) * 32ms)}
+@keyframes slidein{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+@keyframes slideinb{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+.prog{gap:14px}
+.circ{appearance:none;flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--hair);background:var(--paper);color:var(--ink);display:grid;place-items:center;cursor:pointer;transition:transform .18s var(--ease),border-color .2s}
+.circ:active{transform:scale(.9)}
+.circ svg{width:18px;height:18px}
+.bar{height:6px;border-radius:999px;background:#E4D8BC;overflow:hidden}
+.bar i{top:0;height:6px;border-radius:999px;background:linear-gradient(90deg,var(--moss),#5E7C5F);transition:width .6s var(--ease)}
+.prog .n{min-width:0;font-size:20px;color:var(--moss);font-weight:600}
+.prog .n small{font-size:14px;font-weight:500}
+.qhead{gap:8px;padding-top:4px}
+.qhead h2{font-size:clamp(24px,6.2vw,30px)}
+.opts,.opts.grid{display:grid;grid-template-columns:1fr;gap:10px;border:0}
+.opts.two{grid-template-columns:1fr 1fr}
+@media (max-width:340px){.opts.two{grid-template-columns:1fr}}
+.opt,.opts.grid .opt{background:var(--paper);border:1.5px solid transparent;border-radius:16px;padding:15px 16px;gap:14px;font-size:17px;line-height:1.45;
+  box-shadow:0 0 0 1px var(--hair);transition:transform .16s var(--ease),background .25s,box-shadow .25s,border-color .25s}
+.opts.two .opt{padding:14px 12px;gap:10px;font-size:16.5px}
+.opt:hover{padding-left:16px;background:var(--paper)}
+.opts.two .opt:hover{padding-left:12px}
+@media (hover:hover){.opt:hover{box-shadow:0 0 0 1px var(--gold),0 8px 18px -14px rgba(74,54,20,.5)}}
+.opt:active{transform:scale(.975)}
+.opt .mk{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid #CDBD9A;display:grid;place-items:center;color:var(--moss-ink);font:600 15px/1 var(--f-num);font-variant-numeric:lining-nums;transition:background .25s,border-color .25s,transform .35s var(--spring)}
+.opt .mk svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s .08s ease}
+.opt[aria-pressed="true"]{background:#EEF0E0;border-color:var(--moss);box-shadow:0 6px 16px -12px rgba(52,80,63,.6)}
+.opt[aria-pressed="true"] .mk{background:var(--moss);border-color:var(--moss);transform:scale(1.08)}
+.opt[aria-pressed="true"] .mk svg{stroke-dashoffset:0}
+.opt .tx{min-width:0;flex:1}
+.dock{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 -4px;padding:22px 4px calc(14px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(rgba(243,236,220,0),var(--bg) 34%)}
+.dock .cnt{font-size:14px;font-weight:500;color:var(--muted);letter-spacing:.06em}
+.dock .btn{min-width:150px}
+.dock.solo{justify-content:flex-end}
+/* 結果頁 */
+.res{gap:26px;max-width:760px;margin:0 auto;width:100%}
+.res.fade{animation:none}
+.res>*{animation:rise .7s var(--ease) both}
+.res>*:nth-child(2){animation-delay:.12s}.res>*:nth-child(3){animation-delay:.22s}.res>*:nth-child(n+4){animation-delay:.3s}
+.rhead{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:8px 0 4px}
+.rhead h2{font-size:clamp(24px,6.4vw,34px)}
+.rhead .sub{color:var(--muted);font-weight:500;max-width:24em}
+.rhead .note{text-align:left;background:var(--gold-soft);border-radius:14px;padding:12px 16px}
+.medals{background:none;aspect-ratio:auto;padding:6px 0 0;gap:clamp(14px,5vw,30px);max-width:none;align-items:flex-start}
+.medal{flex:0 0 clamp(84px,25%,112px);max-width:none;gap:8px;animation:pop .7s var(--spring) both}
+.medal:nth-child(1){animation-delay:.25s}.medal:nth-child(2){animation-delay:.37s}.medal:nth-child(3){animation-delay:.49s}
+.medal img{filter:drop-shadow(0 6px 10px rgba(74,54,20,.18))}
+.medal span{font-size:14px}
+@keyframes pop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+.feature,.card{border:0;border-radius:var(--r);box-shadow:0 0 0 1px var(--hair),var(--shadow)}
+.feature::before,.feature::after,.card::before,.card::after{display:none}
+.feature{padding:14px;gap:18px}
+.feature .pbody{padding:4px 8px 10px}
+.card{padding:12px;gap:14px}
+.card .pbody{padding:2px 6px 8px;flex:1}
+@media (min-width:681px){.feature{padding:18px;gap:28px}.feature .pbody{padding:10px 12px 10px 0}}
+.tile{border-radius:14px}
+.tile .tag{border-radius:999px;padding:5px 11px;font-weight:600;letter-spacing:.14em;box-shadow:0 1px 3px rgba(74,54,20,.12)}
+.rank{align-items:center}
+.feature .rank .label{background:var(--gold);color:#FFF9EC;padding:7px 12px;border-radius:999px;letter-spacing:.16em}
+.card .rank .label{letter-spacing:.16em}
+.match{font-weight:600}
+.help li{border-radius:999px;padding:5px 13px;font-size:14.5px}
+.why{gap:8px;font-size:15px;line-height:1.65}
+.why li::before{width:6px;height:6px;border-radius:50%;transform:translateY(-3px)}
+.quote{font-size:14.5px;border-top:0;background:var(--bg);border-radius:14px;padding:14px 16px}
+.pfoot{padding-top:4px}
+.pfoot .btn{padding:13px 22px;font-size:15px}
+.more{background:var(--paper);border-radius:var(--r);box-shadow:0 0 0 1px var(--hair);padding:18px 18px 6px}
+.more h3{font-size:17px;border-bottom:0;padding-bottom:6px}
+.more a{border-bottom:0;border-top:1px solid var(--hair);grid-template-columns:44px 1fr auto;gap:14px;transition:transform .18s var(--ease)}
+.more a:first-of-type{border-top:0}
+.more a:active{transform:scale(.985)}
+.more .mini{border-radius:12px}
+.deal{border:0;border-radius:var(--r);box-shadow:0 0 0 1px #E3CFA3;grid-template-columns:120px 1fr}
+.deal .art{border-radius:50%;border:3px solid #FFF9EC;box-shadow:0 6px 16px -8px rgba(74,54,20,.4)}
+@media (max-width:560px){.deal{grid-template-columns:1fr;text-align:center}.deal .art{max-width:112px}.deal .actions{justify-content:center}.deal .actions .btn{width:100%}}
+.sync{border:0;background:var(--paper);box-shadow:0 0 0 1px var(--hair);padding:22px;gap:12px}
+.actions{gap:14px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 
 <div class="wrap">
@@ -457,23 +595,20 @@ function setTimer(s){document.getElementById("timer").textContent=s}
 
 function intro(){
   i=-1; ans={};
-  app.innerHTML = `<section class="intro fade">
-    <div class="copy">
-      <span class="label">PERSONAL WELLNESS CONSULTATION</span>
-      <h1>九個問題，<br>找到你的日常保養</h1>
-      <p class="lead">依照你的作息、飲食與想改善的地方，從官網保健、體態管理與保養產品中，挑出最適合你的三樣。最後一題作答完，結果立刻出現。</p>
-      ${STORE?`<p class="host">你的健康顧問：<b class="hostname">${esc(hostName())}</b></p>
-      <div class="field" style="max-width:360px"><label for="cname">你的姓名</label><input id="cname" autocomplete="name" maxlength="30" value="${esc(custName)}" placeholder="例如：王小明"><span class="err" id="cerr"></span></div>
-      <p class="note" style="max-width:30em">作答完成後，你的姓名與測驗結果會傳送給這位顧問，方便為你說明推薦的產品。</p>`:""}
-      <div><button class="btn" id="go">開始測驗 ${ARROW}</button></div>
-      <div class="steps3">
-        <div><b>09</b><span>個生活與健康問題</span></div>
-        <div><b>60″</b><span>約一分鐘完成</span></div>
-        <div><b>03</b><span>樣推薦，附上理由</span></div>
+  app.innerHTML = `<section class="intro2">
+    <div class="poster">
+      <img class="art" src="img/hero-art.webp" alt="新藝術風格插畫：手持草本精華瓶的女子" width="900" height="840" fetchpriority="high">
+      <div class="ptext rise">
+        <span class="label">PERSONAL WELLNESS CONSULTATION</span>
+        <h1>九個問題，<br>找到你的日常保養</h1>
+        <p class="lead">依照你的作息、飲食與想改善的地方，為你挑出最適合的三樣產品。</p>
+        ${STORE?`<p class="host">你的健康顧問：<b class="hostname">${esc(hostName())}</b></p>
+        <div class="field"><label for="cname">你的姓名</label><input id="cname" autocomplete="name" maxlength="30" value="${esc(custName)}" placeholder="例如：王小明"><span class="err" id="cerr"></span>
+        <p class="note">作答完成後，你的姓名與測驗結果會傳送給這位顧問，方便為你說明推薦的產品。</p></div>`:""}
+        <button class="btn" id="go">開始測驗 ${ARROW}</button>
+        <p class="meta"><span><b>9</b>題</span><i></i><span>約 <b>60</b>秒</span><i></i><span><b>3</b>樣推薦</span></p>
       </div>
     </div>
-    <div class="hero"><img src="img/hero.webp" alt="新藝術風格插畫：手持草本精華瓶的女子" width="820" height="1093" fetchpriority="high">
-      <div class="sec" aria-hidden="true"><b>60″</b><span>SECONDS</span></div></div>
   </section>`;
   document.getElementById("go").onclick=()=>{
     if(STORE){ const v=document.getElementById("cname").value.trim();
@@ -790,44 +925,69 @@ function qrView(o){
   window.scrollTo({top:0}); app.querySelector("h2").focus({preventScroll:true});
 }
 
-function go(n){ i=n; render(); window.scrollTo({top:0}); }
+const RM = matchMedia("(prefers-reduced-motion:reduce)").matches;
+const buzz = n=>{ try{ navigator.vibrate&&navigator.vibrate(n) }catch(e){} };   /* 輕微震動回饋（Android 支援；iPhone 的瀏覽器不開放） */
+let busy=false;
+function go(n){
+  if(busy) return;
+  const sec=app.querySelector(".q"), dir=n<i?"b":"f";
+  const run=()=>{ busy=false; i=n; render._dir=dir; render(); window.scrollTo({top:0}); };
+  if(sec&&!RM){ busy=true; sec.classList.add("leave",dir); setTimeout(run,170); } else run();
+}
+const CHECK=`<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.4l3 3 6-6.6"/></svg>`;
 
 function render(){
   const qs = visible(), q = qs[i];
   if(!q){ return result(); }
   const total = qs.length, cur = ans[q.id];
   setTimer(`QUESTION ${String(i+1).padStart(2,"0")}`);
-  const sel = k => q.multi ? (cur||[]).includes(k) : cur===k;
   const last = i===total-1;
-  const fresh = render._last!==q.id; render._last=q.id;   /* 只有換題時才播淡入動畫，點選答案不會整頁抖動 */
-  app.innerHTML = `<section class="q${fresh?" fade":""}">
-    <div class="prog"><span class="n">${String(i+1).padStart(2,"0")}<small> / ${String(total).padStart(2,"0")}</small></span><div class="bar"><i style="width:${((i+1)/total*100).toFixed(1)}%"></i></div></div>
+  const two = q.opts.length>6 && q.opts.every(o=>!o.sub && o.l.length<=6);
+  const p0 = render._pct||0, p1 = (i+1)/total*100; render._pct=p1;
+  app.innerHTML = `<section class="q in ${render._dir==="b"?"b":""}">
+    <div class="prog"><button class="circ" id="back" aria-label="${i===0?"回首頁":"上一題"}"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3.5L5.5 9l5.5 5.5"/></svg></button>
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${i+1}"><i style="width:${p0.toFixed(1)}%"></i></div>
+      <span class="n">${i+1}<small> / ${total}</small></span></div>
     <div class="qhead"><h2 id="qt">${esc(q.title)}</h2>${q.hint?`<p class="hint">${esc(q.hint)}</p>`:""}</div>
-    <div class="opts ${q.opts.length>6?"grid":""}" role="group" aria-labelledby="qt">
-      ${q.opts.map((o,k)=>`<button class="opt" data-k="${k}" aria-pressed="${sel(k)}"><span class="k">${q.multi&&sel(k)?(q.id==="goal"?cur.indexOf(k)+1:"✓"):String.fromCharCode(97+k)}</span><span>${esc(o.l)}${o.sub?`<small>${esc(o.sub)}</small>`:""}</span></button>`).join("")}
+    <div class="opts ${two?"two":""}" role="group" aria-labelledby="qt">
+      ${q.opts.map((o,k)=>`<button class="opt" data-k="${k}" aria-pressed="false" style="--d:${k}"><span class="mk"></span><span class="tx">${esc(o.l)}${o.sub?`<small>${esc(o.sub)}</small>`:""}</span></button>`).join("")}
     </div>
-    <div class="nav">
-      <button class="back" id="back">← ${i===0?"回首頁":"上一題"}</button>
-      <button class="btn" id="next" ${q.multi?(!q.optional&&!(cur||[]).length?"disabled":""):(cur===undefined?"disabled":"")}>${last?"查看我的結果":"下一題"} ${ARROW}</button>
-    </div>
+    ${q.multi?`<div class="dock"><span class="cnt" id="cnt"></span><button class="btn" id="next">${last?"查看我的結果":"下一題"} ${ARROW}</button></div>`
+      :(cur!==undefined?`<div class="dock solo"><button class="btn" id="next">${last?"查看我的結果":"下一題"} ${ARROW}</button></div>`:"")}
   </section>`;
+  paint(q);
+  const bar=app.querySelector(".bar i"); requestAnimationFrame(()=>requestAnimationFrame(()=>{ bar.style.width=p1.toFixed(1)+"%"; }));
   app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(q,+b.dataset.k));
-  document.getElementById("back").onclick=()=> i===0?intro():go(i-1);
+  document.getElementById("back").onclick=()=>{ if(busy) return; i===0?intro():go(i-1); };
   const nx=document.getElementById("next"); if(nx) nx.onclick=()=>go(i+1);
+}
+/* 只更新選取狀態，不重畫整頁，所以點選時畫面不會跳動 */
+function paint(q){
+  const cur=ans[q.id];
+  app.querySelectorAll(".opt").forEach(b=>{ const k=+b.dataset.k;
+    const on = q.multi ? (cur||[]).includes(k) : cur===k;
+    b.setAttribute("aria-pressed",on);
+    const mk=b.querySelector(".mk"), want = on&&q.id==="goal" ? String(cur.indexOf(k)+1) : "✓";
+    if(mk.dataset.v!==want){ mk.dataset.v=want; mk.innerHTML = want==="✓"?CHECK:want; }
+  });
+  if(q.multi){ const n=(cur||[]).length, nx=document.getElementById("next"), c=document.getElementById("cnt");
+    nx.disabled = !q.optional && !n;
+    c.textContent = n ? `已選 ${n} 項${q.multi<=3?`（最多 ${q.multi} 項）`:""}` : (q.optional?"都沒有也可以直接下一題":"請至少選 1 項"); }
 }
 
 function pick(q,k){
+  if(busy) return;
+  buzz(8);
   if(q.multi){
     let a = ans[q.id] ? ans[q.id].slice() : [];
     if(a.includes(k)) a=a.filter(x=>x!==k);
     else { a.push(k); if(a.length>q.multi) a.shift(); }
     ans[q.id]=a;
     if(!visible().some(x=>x.id==="skin")) delete ans.skin;
-    render();
-    const b=app.querySelector(`.opt[data-k="${k}"]`); if(b) b.focus({preventScroll:true});
+    paint(q);
   } else {
-    ans[q.id]=k; render();   /* 單選題：點了就自動到下一題 */
-    clearTimeout(pick._t); pick._t=setTimeout(()=>go(i+1),260);
+    ans[q.id]=k; paint(q);   /* 單選題：點了就自動到下一題 */
+    clearTimeout(pick._t); pick._t=setTimeout(()=>go(i+1),RM?0:300);
   }
 }
 
@@ -897,29 +1057,23 @@ function result(){
   const nmax = R.needs[0]?.[1]||1;
   const [a,...others] = R.picks;
   const body = (r,ix,big)=>`<div class="pbody">
-      <div class="rank"><span class="label">${ix===0?"首選推薦":"推薦 0"+(ix+1)}</span><span class="match">${pct(r,R)}%<small>符合</small></span></div>
+      <div class="rank"><span class="label">${ix===0?"首選推薦":"推薦 0"+(ix+1)}</span><span class="match"><span class="cu" data-v="${pct(r,R)}">${pct(r,R)}</span>%<small>符合</small></span></div>
       <div><div class="pname">${esc(r.p.n)}</div><div class="vendor">${esc(r.p.v)}${r.p.kit?"・組合方案":""}</div></div>
       ${r.p.b&&r.p.b.length?`<div class="help"><span class="hl">能幫你</span><ul>${r.p.b.slice(0,big?4:3).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
       <div class="whyw"><span class="hl">為什麼推薦給你</span><ul class="why">${reasons(r,R.why).map(w=>`<li>${esc(w)}</li>`).join("")}</ul></div>
       ${big?`<p class="quote">「${esc(r.p.d)}」<br><span class="vendor" style="font-family:var(--f-sans)">官網介紹</span></p>`:""}
       <div class="pfoot"><span class="price">${money(r.p.p)}<small>起</small></span>
-        <a class="link" href="${purl(r.p.h)}" target="_blank" rel="noopener">到官網查看 ${ARROW}</a></div>
+        <a class="btn${big?"":" ghost"}" href="${purl(r.p.h)}" target="_blank" rel="noopener">到官網查看 ${ARROW}</a></div>
     </div>`;
 
   const medals = R.needs.filter(([t])=>medalSrc(t)).slice(0,3);
-  app.innerHTML = `<section class="res fade">
-    ${medals.length?`<div class="medals" aria-label="你的保養重點">${medals.map(([t])=>`<div class="medal"><img src="${medalSrc(t)}" alt="" width="240" height="240"><span>${esc(NEED[t])}</span></div>`).join("")}</div>`:""}
-    <div class="rx">
-      <div class="copy">
-        <span class="label">YOUR WELLNESS PROFILE</span>
-        <h2 tabindex="-1">${R.needs.length?`先從「${esc(NEED[R.needs[0][0]])}」開始，<br>最容易感受到改變`:"你的狀態不錯，<br>從基礎營養開始就好"}</h2>
-        <p class="sub">以下是依照你的回答挑選的三樣產品，以及挑選的理由。</p>
-        ${(ans.sym||[]).includes(10)?`<p class="note" style="border-left:2px solid var(--gold);padding-left:10px">你提到心跳不規則。這類狀況建議先請醫師檢查，保健食品不能取代醫療診斷。</p>`:""}
-        <span class="speed">推薦計算時間 ${ms} 毫秒</span>
-      </div>
-      <div class="meters" aria-label="你的保養重點">
-        ${R.needs.map(([t,v])=>`<div class="meter"><span>${esc(NEED[t])}</span><span class="t"><i style="width:${Math.round(v/nmax*100)}%"></i></span></div>`).join("")}
-      </div>
+  app.innerHTML = `<section class="res">
+    <div class="rhead">
+      <span class="label">YOUR WELLNESS PROFILE</span>
+      <h2 tabindex="-1">${R.needs.length?`先從「${esc(NEED[R.needs[0][0]])}」開始，<br>最容易感受到改變`:"你的狀態不錯，<br>從基礎營養開始就好"}</h2>
+  ${medals.length?`<div class="medals" aria-label="你的保養重點">${medals.map(([t])=>`<div class="medal"><img src="${medalSrc(t)}" alt="" width="240" height="240"><span>${esc(NEED[t])}</span></div>`).join("")}</div>`:""}
+      <p class="sub">以下是依照你的回答挑選的三樣產品，以及挑選的理由。</p>
+      ${(ans.sym||[]).includes(10)?`<p class="note">你提到心跳不規則。這類狀況建議先請醫師檢查，保健食品不能取代醫療診斷。</p>`:""}
     </div>
     ${a?`<article class="feature">${tile(a)}${body(a,0,true)}</article>`:""}
     ${others.length?`<div class="pair">${others.map((r,ix)=>`<article class="card">${tile(r)}${body(r,ix+1,false)}</article>`).join("")}</div>`:""}
@@ -933,6 +1087,9 @@ function result(){
       </div>
     </div>
   </section>`;
+  if(!RM) app.querySelectorAll(".cu").forEach((el,ix)=>{ const v=+el.dataset.v, t1=performance.now()+350+ix*150; el.textContent="0";   /* 符合度數字從 0 數上來 */
+    const tick=t=>{ const p=Math.min(1,Math.max(0,(t-t1)/900)), e=1-Math.pow(1-p,3); el.textContent=Math.round(v*e); if(p<1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); });
+  buzz([10,40,14]);
   document.getElementById("again").onclick=intro;
   document.getElementById("copy").onclick=()=>copy(record);
   document.getElementById("ask").onclick=()=>copyText(askText(),"已複製，貼給你的顧問就可以了");
@@ -964,7 +1121,7 @@ const DEAL_LINES = [
 function deal(R){
   const n = STORE ? esc(hostName()) : "介紹你來的顧問";
   const line = DEAL_LINES[Math.floor(Math.random()*DEAL_LINES.length)](n);
-  return `<div class="deal"><img class="art" src="img/deal.webp" alt="" loading="lazy" width="560" height="560"><div class="dtext">
+  return `<div class="deal"><img class="art" src="img/deal.webp" alt="" loading="lazy" width="360" height="360"><div class="dtext">
     <span class="label">SPECIAL OFFER</span>
     <p class="dealh">${line}</p>
     <p class="note">不急著決定也完全沒關係，先把結果收著，想清楚了再找${n}聊聊就好。</p>
