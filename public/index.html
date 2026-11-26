@@ -1,0 +1,746 @@
+<title>60 秒健康選品</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="回答 8 題，立即得到適合你的保健與保養產品建議。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
+<style>
+/* Layout: an apothecary-style consultation. Quiet stone ground, serif questions, hairline rules;
+   the result reads like a personal prescription card with illustrated product tiles. */
+:root{
+  --bg:#F1F0EC; --paper:#FBFAF7; --ink:#1D211E; --muted:#6E726C; --hair:#D9D7CF;
+  --moss:#34503F; --moss-ink:#F6F4EE; --moss-soft:#E4E8E1; --gold:#A8875A; --gold-soft:#EFE7DA;
+  --f-serif:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --f-sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-num:"Cormorant Garamond","Noto Serif TC",Georgia,serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141715; --paper:#1B1F1C; --ink:#ECEAE3; --muted:#A3A69E; --hair:#30352F;
+  --moss:#9DBBA6; --moss-ink:#141715; --moss-soft:#243029; --gold:#CDB088; --gold-soft:#2E2820; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141715; --paper:#1B1F1C; --ink:#ECEAE3; --muted:#A3A69E; --hair:#30352F;
+  --moss:#9DBBA6; --moss-ink:#141715; --moss-soft:#243029; --gold:#CDB088; --gold-soft:#2E2820; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:300 16px/1.75 var(--f-sans);letter-spacing:.01em;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 56px;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--hair)}
+.brand{display:flex;align-items:baseline;gap:10px;font:600 17px/1 var(--f-serif);letter-spacing:.08em}
+.brand em{font:italic 500 15px/1 var(--f-num);color:var(--gold);letter-spacing:.04em}
+.timer{font-size:12px;letter-spacing:.18em;color:var(--muted)}
+p{margin:0}
+h1,h2,h3{font-family:var(--f-serif);font-weight:600;margin:0;text-wrap:balance;letter-spacing:.02em}
+h1{font-size:clamp(32px,6vw,54px);line-height:1.25}
+h2{font-size:clamp(24px,4vw,34px);line-height:1.4}
+h2:focus{outline:none}
+.label{font:500 12px/1 var(--f-sans);letter-spacing:.24em;color:var(--gold)}
+.btn{appearance:none;border:1px solid var(--moss);border-radius:2px;padding:15px 30px;font:500 15px/1 var(--f-sans);letter-spacing:.14em;cursor:pointer;
+  background:var(--moss);color:var(--moss-ink);display:inline-flex;align-items:center;gap:12px;text-decoration:none;transition:background .2s,color .2s}
+.btn:hover{background:transparent;color:var(--moss)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--hair)}
+.btn.ghost:hover{border-color:var(--ink)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn:disabled:hover{background:var(--moss);color:var(--moss-ink)}
+.arrow{display:inline-block;width:22px;height:1px;background:currentColor;position:relative}
+.arrow::after{content:"";position:absolute;right:0;top:-3px;width:7px;height:7px;border-top:1px solid currentColor;border-right:1px solid currentColor;transform:rotate(45deg)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+/* intro */
+.intro{display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center;padding-block:clamp(12px,5vw,48px)}
+.intro .copy{display:flex;flex-direction:column;gap:24px;min-width:0}
+.intro .lead{color:var(--muted);max-width:30em;font-size:16px}
+.dial{position:relative;aspect-ratio:1;max-width:320px;width:100%;justify-self:center}
+.dial svg{width:100%;height:100%;display:block}
+.dial .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.dial .num b{font:500 clamp(84px,14vw,128px)/.9 var(--f-num);color:var(--ink)}
+.dial .num span{font:400 13px/1 var(--f-sans);letter-spacing:.3em;color:var(--muted)}
+.steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--hair);margin-top:8px}
+.steps3 div{padding:16px 14px 0 0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.steps3 div+div{padding-left:14px;border-left:1px solid var(--hair)}
+.steps3 b{font:500 26px/1 var(--f-num);color:var(--moss)}
+.steps3 span{font-size:13px;color:var(--muted);line-height:1.5}
+@media (max-width:680px){.intro{grid-template-columns:1fr;gap:24px}.dial{max-width:200px;order:-1}}
+/* question */
+.q{display:flex;flex-direction:column;gap:28px;max-width:680px;margin:0 auto;width:100%;padding-block:clamp(8px,3vw,32px)}
+.prog{display:flex;align-items:center;gap:16px}
+.prog .n{font:500 22px/1 var(--f-num);font-variant-numeric:lining-nums tabular-nums;min-width:4.2em}
+.prog .n small{font-size:15px;color:var(--muted)}
+.bar{flex:1;height:1px;background:var(--hair);position:relative}
+.bar i{position:absolute;left:0;top:-1px;height:3px;background:var(--moss);transition:width .35s ease}
+.qhead{display:flex;flex-direction:column;gap:10px}
+.hint{color:var(--muted);font-size:14px}
+.opts{display:flex;flex-direction:column;border-top:1px solid var(--hair)}
+.opts.grid{display:grid;grid-template-columns:1fr 1fr;column-gap:28px}
+.opts.grid .opt{border-bottom:1px solid var(--hair)}
+@media (max-width:560px){.opts.grid{grid-template-columns:1fr}}
+.opt{appearance:none;background:transparent;border:0;border-bottom:1px solid var(--hair);text-align:left;color:var(--ink);
+  font:400 17px/1.5 var(--f-sans);padding:18px 6px;cursor:pointer;display:flex;gap:18px;align-items:center;min-width:0;transition:padding .2s,background .2s}
+.opt:hover{padding-left:14px;background:var(--paper)}
+.opt .k{flex:none;width:28px;height:28px;border:1px solid var(--hair);border-radius:50%;display:grid;place-items:center;
+  font:italic 500 16px/1 var(--f-num);color:var(--muted);transition:all .2s}
+.opt[aria-pressed="true"]{background:var(--paper);padding-left:14px}
+.opt[aria-pressed="true"] .k{background:var(--moss);border-color:var(--moss);color:var(--moss-ink);font-style:normal}
+.opt small{display:block;color:var(--muted);font-size:13px;font-weight:300}
+.nav{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+.back{appearance:none;background:none;border:0;color:var(--muted);font:400 14px var(--f-sans);letter-spacing:.12em;cursor:pointer;padding:8px 0}
+.back:hover{color:var(--ink)}
+/* result */
+.res{display:flex;flex-direction:column;gap:40px}
+.rx{display:grid;grid-template-columns:1fr 280px;gap:36px;align-items:end;padding-bottom:28px;border-bottom:1px solid var(--hair)}
+.rx .copy{display:flex;flex-direction:column;gap:14px;min-width:0}
+.rx .sub{color:var(--muted)}
+.meters{display:flex;flex-direction:column;gap:12px}
+.meter{display:grid;grid-template-columns:5.5em 1fr;gap:12px;align-items:center;font-size:13px}
+.meter .t{height:2px;background:var(--hair);position:relative}
+.meter .t i{position:absolute;left:0;top:-1px;height:4px;background:var(--moss)}
+.meter:first-child .t i{background:var(--gold)}
+.speed{font-size:12px;letter-spacing:.14em;color:var(--muted)}
+@media (max-width:680px){.rx{grid-template-columns:1fr;gap:24px}}
+.feature{display:grid;grid-template-columns:minmax(0,320px) 1fr;gap:clamp(20px,4vw,44px);background:var(--paper);border:1px solid var(--hair);padding:clamp(18px,3.5vw,36px)}
+.feature .tile{aspect-ratio:1}
+@media (max-width:680px){.feature{grid-template-columns:1fr}.feature .tile{aspect-ratio:4/3}}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:680px){.pair{grid-template-columns:1fr}}
+.card{background:var(--paper);border:1px solid var(--hair);padding:clamp(16px,2.6vw,24px);display:flex;flex-direction:column;gap:16px;min-width:0}
+.card .tile{aspect-ratio:16/10}
+.tile,.mini{--tint-bg:color-mix(in srgb,var(--tint) 12%,var(--paper))}
+.tile{position:relative;overflow:hidden;background:var(--tint-bg);display:grid;place-items:center;width:100%}
+.tile svg{width:62%;height:78%;display:block}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:8%}
+.tile .tag{position:absolute;left:12px;top:12px;font-size:11px;letter-spacing:.2em;color:var(--ink);background:var(--paper);padding:4px 8px;z-index:1}
+.pbody{display:flex;flex-direction:column;gap:14px;min-width:0}
+.rank{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.rank .label{color:var(--muted)}
+.feature .rank .label{color:var(--gold)}
+.match{font:500 30px/1 var(--f-num);color:var(--moss)}
+.match small{font:400 11px var(--f-sans);letter-spacing:.16em;color:var(--muted);margin-left:6px}
+.card .match{font-size:24px}
+.pname{font:600 clamp(19px,2.6vw,24px)/1.45 var(--f-serif);letter-spacing:.02em}
+.card .pname{font-size:18px}
+.vendor{font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.why{margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.why li{list-style:none;display:flex;gap:10px;align-items:baseline}
+.why li::before{content:"";flex:none;width:12px;height:1px;background:var(--gold);transform:translateY(-4px)}
+.quote{font:400 14px/1.8 var(--f-serif);color:var(--muted);padding-top:14px;border-top:1px solid var(--hair)}
+.pfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:auto}
+.price{font:500 24px/1 var(--f-num);font-variant-numeric:lining-nums tabular-nums}
+.price small{font:300 12px var(--f-sans);color:var(--muted);margin-left:4px}
+.link{color:var(--ink);font:500 14px/1 var(--f-sans);letter-spacing:.12em;text-decoration:none;display:inline-flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--ink)}
+.link:hover{color:var(--moss);border-color:var(--moss)}
+.more{display:flex;flex-direction:column}
+.more h3{font-size:18px;padding-bottom:14px;border-bottom:1px solid var(--ink)}
+.more a{display:grid;grid-template-columns:44px 1fr auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--hair);color:var(--ink);text-decoration:none}
+.more a:hover .mn{color:var(--moss)}
+.more .mini{width:44px;height:44px;background:var(--tint-bg);display:grid;place-items:center}
+.more .mini svg{width:70%;height:80%}
+.mn{min-width:0;font-size:15px;line-height:1.5}
+.mn span{display:block;font-size:12px;color:var(--muted);letter-spacing:.1em}
+.more .price{font-size:19px}
+.closing{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch}
+@media (max-width:680px){.closing{grid-template-columns:1fr}}
+.actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.sync{display:flex;flex-direction:column;gap:10px;border:1px solid var(--hair);padding:20px}
+.sync .row{display:flex;gap:8px;flex-wrap:wrap}
+.pill{border:1px solid var(--hair);padding:5px 12px;font-size:12px;letter-spacing:.12em;color:var(--muted)}
+.note{font-size:12px;line-height:1.8;color:var(--muted)}
+footer.note{border-top:1px solid var(--hair);padding-top:16px}
+a.tile{text-decoration:none;cursor:pointer}
+a.tile svg,a.tile img{transition:transform .35s ease}
+a.tile:hover svg,a.tile:hover img{transform:scale(1.04)}
+.field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.field label{font-size:13px;letter-spacing:.12em;color:var(--muted)}
+.field input{font:400 17px/1.4 var(--f-sans);color:var(--ink);background:var(--paper);border:1px solid var(--hair);border-radius:2px;padding:13px 14px;width:100%;min-width:0}
+.field input:focus{outline:none;border-color:var(--moss)}
+.prefix{display:flex;align-items:stretch;min-width:0}
+.prefix span{display:flex;align-items:center;padding:0 12px;border:1px solid var(--hair);border-right:0;background:var(--bg);font-size:14px;color:var(--muted);white-space:nowrap}
+.prefix input{flex:1}
+.err{color:#B2453A;font-size:13px;min-height:1em}
+.setup{max-width:600px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:22px;padding-block:clamp(8px,3vw,32px)}
+.out{display:flex;flex-direction:column;gap:12px;border:1px solid var(--hair);background:var(--paper);padding:20px}
+.out code{font:400 13px/1.6 ui-monospace,Menlo,monospace;word-break:break-all;color:var(--ink)}
+.textlink{background:none;border:0;padding:0;color:var(--muted);font:400 14px var(--f-sans);letter-spacing:.08em;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.textlink:hover{color:var(--ink)}
+.host{font-size:13px;letter-spacing:.12em;color:var(--muted)}
+.host b{color:var(--ink);font-weight:500}
+.status{font-size:13px;color:var(--muted)}
+.status.ok{color:var(--moss)}
+.olist{display:flex;flex-direction:column}
+.olist h3,.sform h3{font-size:18px;padding-bottom:12px;border-bottom:1px solid var(--ink)}
+.orow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 0;border-bottom:1px solid var(--hair)}
+.opick{appearance:none;background:none;border:0;padding:0;text-align:left;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;gap:2px;min-width:0}
+.oname{font:600 19px/1.3 var(--f-serif)}
+.omail{font-size:13px;color:var(--muted);word-break:break-all}
+.oact{display:flex;gap:16px;align-items:center}
+.oact .btn{padding:10px 18px;font-size:13px}
+.sform{display:flex;flex-direction:column;gap:18px}
+.qrv{max-width:560px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;padding-block:clamp(8px,3vw,28px)}
+.qrv .out{width:100%;text-align:left}
+.qrbox{background:#fff;padding:18px;border:1px solid var(--hair);width:min(100%,340px);aspect-ratio:1;display:grid;place-items:center}
+.qrbox svg{width:100%;height:100%;display:block}
+.hl{display:block;font-size:12px;letter-spacing:.16em;color:var(--muted);margin-bottom:6px}
+.help ul{margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.help li{list-style:none;background:var(--moss-soft);color:var(--ink);padding:4px 10px;font-size:14px;line-height:1.5}
+.deal{background:var(--gold-soft);border:1px solid var(--gold);padding:clamp(20px,4vw,36px);display:flex;flex-direction:column;gap:14px}
+.dealh{font:600 clamp(19px,3vw,24px)/1.6 var(--f-serif);letter-spacing:.02em}
+.dealh b{color:var(--moss);font-weight:700}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);
+  padding:12px 22px;font-size:14px;letter-spacing:.06em;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.fade{animation:fade .45s cubic-bezier(.2,.7,.2,1)}
+@keyframes fade{from{opacity:.2;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}.bar i,.opt{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">健康選品 <em>Wellness Edit</em></div>
+    <div class="timer" id="timer" aria-live="off"></div>
+  </header>
+  <main id="app" aria-live="polite"></main>
+  <footer class="note">本測驗結果僅供選購參考，不是醫療診斷。建議的產品為食品或化粧品，不具醫療效能；有疾病、正在用藥、懷孕或哺乳者，請先諮詢醫師或藥師。產品介紹文字取自美安台灣官網，價格為資料擷取時（2026/11/26）的最低售價，實際以官網為準。</footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+(function(){
+const SHOP = "https://www.markettaiwan.com.tw/products/";
+const CDN = "https://cdn.shopify.com/s/files/1/0945/2850/4109/files/";
+
+/* Products: real items from markettaiwan.com.tw (products.json, 2026-11-26).
+   d = official description sentence (verbatim). t = relevance weights by need. */
+const P = [
+ {h:"prime-smart-release-magnesium-tablets",n:"Prime™鎂力錠",v:"Prime™",p:750,img:"5627c0842e9048c105d52280dc67ae4034e3bee7_5826112twn_en_US.jpg",d:"強健骨骼。放鬆肌肉。幫助入睡。",t:{sleep:3,muscle:3,stress:1.5,joint:1,exercise:1}},
+ {h:"gotrim-acts-with-ashwagandha",n:"全新生活™舒衡配方錠狀食品含南非醉茄根葉萃取物",v:"GoTrim",p:1750,img:"e906d6b47366db2f7bceaf59e4f165cf786b8215_3519641twn_en_US.jpg",d:"現代人生活步調快、工作繁忙，更需要加強保養。",t:{stress:3,sleep:2}},
+ {h:"limited-edition-rise-rest-system",n:"日活夜寧保養計畫",v:"Isotonix®",p:1380,img:"e49ba7ed7bee95925c8693b15876210115f92a17_5826985twn_en_US.jpg",d:"透過精心搭配的重要營養補充，陪伴您從白天到夜晚，建立規律且平衡的生活節奏。",t:{sleep:2.5,energy:2,joint:.5},kit:1},
+ {h:"prime-creatine-monohydrate-with-taurine",n:"Prime™肌酸牛磺酸粉末",v:"Prime™",p:1150,img:"852d5ae370fafc965e90383d117914aa6bdb15aa_5826025twn_en_US.jpg",d:"它更是您促進專注力、活力與韌性的每日支援。",t:{energy:2.5,exercise:2.5,focus:2}},
+ {h:"prime-colostrum-with-lion-s-mane",n:"Prime™牛初乳粉（含猴頭菇）",v:"Prime™",p:1270,img:"d9c3ab9188701d4fcea8569d1d344c0a323e8908_5823696twn_en_US.jpg",d:"融合了初乳與猴頭菇兩大成分，有助於保護力與思緒保健。",t:{immune:3,focus:3,energy:1,stress:.5}},
+ {h:"shopping-annuity-brand-premium-protect-plus",n:"樂優選™紫錐菊複方膠囊食品",v:"Market America",p:1040,img:"17a7ebe112b74af1863c7e739428ecda037752c3_5820846.jpg",d:"每份含有專為保健而設計的成分：紫錐菊、靈芝、西洋蔘、維生素C及鋅。",t:{immune:3}},
+ {h:"the-usuals-vitamin-c-citrus-plus-chewable-tablets-5824004twn",n:"樂優選™維生素C咀嚼錠",v:"The Usuals",p:465,img:"a97631523038b1de268b41e23ae590e9030ef561_T1160_The_Usuals_Vitamin_C_White_Cap_Front_White_7bcfadef-707e-462b-9293-3952342e00b7.jpg",d:"最令人熟知的，就是維生素C具有抗氧化作用。",t:{immune:2,diet:1,skin:.5}},
+ {h:"opc-3-burst",n:"OPC-3® 雙層Q心嚼粒",v:"Isotonix®",p:900,img:"e1c880e54e7411d470c2169055507eef48c5dc88_5826140twn_en_US.jpg",d:"含有多種植物萃取成分的科研配方，包括源自於山桑子、葡萄籽、紅酒、松樹皮。",t:{immune:1.5,heart:1.5,skin:.5}},
+ {h:"vision-health-care-kit",n:"優適保健組合",v:"Isotonix®",p:2180,img:"6c233c9d3723fdfe3b2de08dcb863f5e0cb4374b_5817136twn_en_US.jpg",d:"含有2項商品：愛尚它®適明配方粉末與紅藻精華膠囊食品(含蝦紅素)。",t:{eye:3.5},kit:1},
+ {h:"prime-red-algae-extract-softgel-contains-astaxanthin",n:"紅藻精華軟膠囊食品(含蝦紅素)",v:"Prime™",p:1180,img:"51feabf010babce8a290f17b38c57fd52e2854fe_4038999twn_en_US.jpg",d:"含有AstaReal®蝦紅素。",t:{eye:3,skin:.5}},
+ {h:"isotonix-red-algae-extract-powder-contains-astaxanthin-packet",n:"愛尚它®紅藻萃取精華粉末(含蝦紅素)隨身包",v:"Isotonix®",p:1380,img:"cd206739192fa2a1052facdfbaa67830b15770b9_5819557twn_en_US.jpg",d:"一款使用蝦紅素(來自AstaReal®)的純素配方。",t:{eye:2.8}},
+ {h:"joint-maintenance-kit",n:"行動力保健組合",v:"Isotonix®",p:5000,img:"",d:"含有3項商品：愛尚它®固可寧配方粉末、愛尚它®鳳梨酵素粉末與易善™魚油含維生素E軟膠囊食品。",t:{joint:4},kit:1},
+ {h:"essential-omega-iii-fish-oil-contains-vitamin-e-softgel",n:"易善™魚油含維生素E軟膠囊食品",v:"Essential",p:1495,img:"32648f7e834ba8c9a8da23daa92e22b2d4f2cd66_5197twn_en_US.jpg",d:"內含EPA和DHA、Omega-3脂肪酸及維生素E，能幫助維持健康。",t:{heart:3,joint:1.5,eye:.8,diet:1}},
+ {h:"isotonix-opc-3-beauty-blend",n:"愛尚它®美妍配方粉末",v:"Isotonix®",p:2180,img:"f32d6e9b6842ad2e3bc356852331fde97fc3a22e_2252twn_en_US.jpg",d:"一種從內到外幫助美麗及健康的膳食補充品。",t:{skin:3.5}},
+ {h:"prime-nad-contains-nicotinamide-and-d-ribose-tran-resveratrol",n:"Prime™菸鹼醯胺D-核糖複方凍",v:"Prime™",p:1295,img:"ddb83fea1c29c106dc51c5badbbb07d34058f1ee_5822690twn_en_US.jpg",d:"解鎖青春美麗和健康活力的秘密。",t:{aging:3,energy:1.5,skin:1.5}},
+ {h:"chuchos-100-years-young-regimen",n:"Chucho百歲養生套組",v:"Isotonix®",p:5485,img:"a63f42b6ee7a5709a1e0951f8a8ccacb1ae7af98_5826760twn_en_US.jpg",d:"「為年月增加生命。」",t:{aging:3.5,heart:1,energy:1},kit:1},
+ {h:"isotonix-daily-essentials-trial-sized-marketing-packs-pack-of-10",n:"愛尚它®每日精選組合隨身包（10組入）",v:"Isotonix®",p:2205,img:"5563acdd6d99aa0fe907cfa158fbed8460ee0d38_5820476twn_en_US.jpg",d:"提供您日常所需的多種維生素、礦物質及營養素，每1份隨身包都包括4種營養保健品。",t:{diet:3.5,energy:1,immune:.5},kit:1},
+ {h:"isotonix-greens-powder",n:"愛尚它®樂活蔬果精華粉末",v:"Isotonix®",p:1320,img:"585b7c958620789350e203e511dde65b7753e4ca_4871497twn_en_US.jpg",d:"萃取自小麥草、大麥草、苜蓿草、螺旋藻、綠藻、綠花椰菜、菠菜與甘藍菜。",t:{diet:3,digest:1,detox:1.5}},
+ {h:"isotonix-digestive-enzymes-with-probiotics-trial-sized-marketing-packs-pack-of-10",n:"愛尚它®益生消化酵素粉末隨身包（10組入）",v:"Isotonix®",p:1800,img:"d757dc9f11a055f1728fc9a0023bb2ab977bc883_5821030twn_en_US.jpg",d:"含有成分DigeZyme™，能提供澱粉酵素、蛋白酵素、纖維素酵素、乳糖酵素與脂肪酵素。",t:{digest:3.5,detox:.5}},
+ {h:"shopping-annuity-brand-premium-balanctea-5821476twn",n:"購物年金™精選舒暢草本茶",v:"Market America",p:485,img:"556e445afa5206fb70e45c38a16a93d3944682e7_5821476twn_en_US.jpg",d:"帶有洛神花的淡雅、清甜口感，加上其它13種草本成分。",t:{digest:2.5,weight:.5,detox:1.5}},
+ {h:"gotrim-detox-kit",n:"全新生活™體內環保組",v:"GoTrim",p:2980,img:"c8d43f19af4f89338a942fbd62e3ea883a9bcd04_5667281twn_en_US.jpg",d:"提供維生素C、E、礦物質、硒、及維持健康所需之膳食纖維。",t:{detox:3.5,digest:2.5,weight:1.5},kit:1},
+ {h:"gotrim-nutrition-shakes",n:"全新生活™即享雪克",v:"GoTrim",p:1175,img:"167ad5c27589d38a73ffbfdda17bda082c603a41_6585twn_en_US.jpg",d:"想在兩餐之間滿足飢餓感嗎？全新生活即享雪克不僅美味滑順、簡單沖調，還能提供多種營養素。",t:{weight:3,diet:1,exercise:.5}},
+ {h:"gotrim-core",n:"全新生活™纖盈錠狀食品",v:"GoTrim",p:1880,img:"dc4d51b7bf887a5f7ad1c5c2d9593049ecef02e4_3632634twn_en_US.jpg",d:"主要含有植物性的成分白腎豆萃取物及LeptiCore™專利配方成分、苦瓜萃取物、以及維生素A(來自β-胡蘿蔔素)。",t:{weight:3.2}},
+ {h:"gotrim-fyf-challenge-kit",n:"全新生活™窈窕挑戰組合",v:"GoTrim",p:4015,img:"a7ebc84759ca65ef6cb70c49c95601240c0ec024_5797192twn_en_US.jpg",d:"包含全新生活™纖盈錠狀食品、全新生活™即享雪克-濃醇香草口味、全新生活™即享雪克-香濃巧克力口味。",t:{weight:3.6},kit:1},
+ {h:"gotrim-30-day-jump-start-kit",n:"全新生活™30天啟動窈窕組合",v:"GoTrim",p:6450,img:"5126539a783b271a41f3ffac02a9c85f51503e5c_5819435twn_en_US.jpg",d:"專為短期追求健康窈窕目標所設計的組合。",t:{weight:3.8},kit:1},
+ {h:"tower-essential-amino-acids",n:"Tower+™必需胺基酸粉末食品",v:"Tower",p:1015,img:"fe4079c807c47ed07e15bf76f46e3c7eafa1945a_T6651_7c972bb6-9284-44da-a3fb-300c86c6ca15.jpg",d:"本產品提供完整的9種必需胺基酸，並含有100%每日建議攝取量的生物素。",t:{exercise:3.2,weight:1}},
+ {h:"hydro1",n:"水素1含氫水",v:"HYDRO1",p:670,img:"ad4efe2e314c19ee2edf9a0e45e2b9dc4f01ffe1_5826860twn_en_US.jpg",d:"採用特殊且精密的溶解氫氣技術製成。",t:{exercise:1.5,energy:.5}},
+ /* skin care, only via the follow-up skin question */
+ {h:"lumiere-de-vie-brightening-c-serum",n:"若美芙™維他命C美白緊緻精華液",v:"Lumière de Vie®",p:1660,img:"4bd2ce72b0eb1b1e67bb67452b2d6d47e719ebde_5819150twn_en_US.jpg",d:"恰如其分地為肌膚補充維他命C，以幫助煥亮膚色。",t:{s_dull:4}},
+ {h:"lumiere-de-vie-retinol-creme",n:"若美芙™A醇抗皺修護精華乳",v:"Lumière de Vie®",p:1430,img:"d6fdb46d1607412d5ef3ee8155148bd8c4b17e44_5819184twn_en_US.jpg",d:"讓您感受A醇賦活新生的魅力。",t:{s_lines:4}},
+ {h:"lumiere-de-vie-ghk-cu-peptide-renewal-complex",n:"若美芙藍銅胜肽活膚精華乳",v:"Lumière de Vie®",p:1370,img:"6f46f94980ff203c3fdfc5ed42d02e0a670b6305_T12277_en_US.jpg",d:"多數胜肽精華僅著重於透過單一修護機制，打造更顯年輕的肌膚。",t:{s_lines:3.6,s_dry:1}},
+ {h:"lumiere-de-vie-hydrating-aloe-cream",n:"若美芙™清新保濕蘆薈霜",v:"Lumière de Vie®",p:655,img:"02efad8ec96e540cf8ac01c03ec61a477a9311e5_5817722twn_en_US.jpg",d:"一款質地超輕盈的保濕霜，能滋潤柔滑肌膚。",t:{s_dry:4}},
+ {h:"lumiere-de-vie-daily-brightening-broad-spectrum-spf-50",n:"若美芙™極致亮白防曬乳SPF50",v:"Lumière de Vie®",p:1500,img:"38fb73df1463fb58802e913d5f45ed60932c7cf0_5819618twn_en_US.jpg",d:"提供肌膚防禦屏障與細緻呵寵，隔離紫外線。",t:{s_sun:4,s_dull:1}}
+];
+
+/* "能幫你": short benefit phrases taken from each product's official description and tags */
+const BEN = {
+ "prime-smart-release-magnesium-tablets":["強健骨骼","放鬆肌肉","幫助入睡","鎂能輔助鈣和鉀的吸收"],
+ "gotrim-acts-with-ashwagandha":["南非醉茄：維持好心情","刺五加、紅景天：舒緩疲勞感","西番蓮：幫助放鬆、入睡"],
+ "limited-edition-rise-rest-system":["陪伴你從白天到夜晚","建立規律且平衡的生活節奏","含維生素K2"],
+ "prime-creatine-monohydrate-with-taurine":["肌酸：促進肌肉強度、支援運動表現","有益大腦認知表現、減少疲倦感","促進專注力與活力"],
+ "prime-colostrum-with-lion-s-mane":["牛初乳免疫球蛋白：增強保護力","寡醣類：促進腸道好菌生長","猴頭菇：維持記憶力、思緒保健"],
+ "shopping-annuity-brand-premium-protect-plus":["紫錐菊、靈芝、西洋蔘","維生素C及鋅","有助健康維持"],
+ "the-usuals-vitamin-c-citrus-plus-chewable-tablets-5824004twn":["抗氧化","促進膠原蛋白形成","促進鐵的吸收"],
+ "opc-3-burst":["葡萄籽、松樹皮、紅酒萃取（OPC 原花青素）","抗自由基，幫助維生素吸收利用","促進血管與循環健康","減少紫外線傷害、幫助膠原蛋白合成"],
+ "vision-health-care-kit":["葉黃素、玉米黃素：保護黃斑部，幫助眼睛適應光線","山桑子：緩解眼睛疲勞","搭配蝦紅素：紓緩 3C 引起的眼部疲勞"],
+ "prime-red-algae-extract-softgel-contains-astaxanthin":["紓緩使用 3C 產品引起的眼部疲勞","滋潤眼睛、支援眼睛對焦","有助防止紫外線引起的肌膚光老化","提升睡眠品質、舒緩疲勞感"],
+ "isotonix-red-algae-extract-powder-contains-astaxanthin-packet":["AstaReal® 蝦紅素純素配方","西印度櫻桃：富含維生素C","維生素E：抗氧化、減少自由基"],
+ "joint-maintenance-kit":["葡萄糖胺：促進關節滑液分泌","薑黃素：舒緩僵硬不適","鳳梨酵素：幫助消化，適合運動後","魚油 Omega-3 與維生素E"],
+ "essential-omega-iii-fish-oil-contains-vitamin-e-softgel":["DHA：眼睛與腦部的重要營養","EPA：維持血液循環順暢","維生素E：抗氧化"],
+ "isotonix-opc-3-beauty-blend":["維生素B7、C、D、E 與鈣鎂鉀：維護肌膚健康","松樹皮、葡萄籽等萃取：養顏美容","維生素C：促進膠原蛋白形成"],
+ "prime-nad-contains-nicotinamide-and-d-ribose-tran-resveratrol":["菸鹼醯胺：提升 NAD+ 水平，支持健康老化","D-核糖：促進新陳代謝、維持充沛活力","白藜蘆醇、石榴、薑黃：抗氧化"],
+ "chuchos-100-years-young-regimen":["為年月增加生命","熟齡全方位保養套組"],
+ "isotonix-daily-essentials-trial-sized-marketing-packs-pack-of-10":["OPC-3＋樂活蔬果＋綜合維生素＋強鈣配方","專為台灣人一天所需的營養設計","隨身包方便攜帶，隨時補充"],
+ "isotonix-greens-powder":["小麥草、螺旋藻等8種蔬果萃取","植化素：有助維持消化道健康","抗氧化，支援體內環保"],
+ "isotonix-digestive-enzymes-with-probiotics-trial-sized-marketing-packs-pack-of-10":["蛋白、澱粉、脂肪、乳糖等多種消化酵素","含益生菌，維持腸道菌相","天然植物酵素，遇胃酸不失活性"],
+ "shopping-annuity-brand-premium-balanctea-5821476twn":["洛神花等14種草本","無咖啡因","清甜好入口"],
+ "gotrim-detox-kit":["維持健康所需的膳食纖維","維生素C、E、硒","體內環保"],
+ "gotrim-nutrition-shakes":["每份20克蛋白質、10克膳食纖維","24種維生素與礦物質","兩餐之間滿足飢餓感"],
+ "gotrim-core":["可溶性膳食纖維：增加飽足感","白腎豆萃取物：澱粉酵素抑制劑","LeptiCore® 專利配方：幫助體態管理"],
+ "gotrim-fyf-challenge-kit":["纖盈錠＋兩種口味即享雪克","一次搭配好的窈窕組合"],
+ "gotrim-30-day-jump-start-kit":["為短期窈窕目標設計","30天啟動組合"],
+ "tower-essential-amino-acids":["完整9種必需胺基酸","100%每日建議量的生物素","運動後補充"],
+ "hydro1":["溶解氫氣技術","零糖","無咖啡因"],
+ "lumiere-de-vie-brightening-c-serum":["抗氧化，淡化細紋與皺紋","淡褪色斑、明亮肌膚","維持肌膚彈性與豐潤柔嫩"],
+ "lumiere-de-vie-retinol-creme":["針對細紋和皺紋，回復肌膚彈性","A醇：促進肌膚新陳代謝","Ectoin：強效鎖水"],
+ "lumiere-de-vie-ghk-cu-peptide-renewal-complex":["藍銅胜肽","打造更顯年輕的肌膚"],
+ "lumiere-de-vie-hydrating-aloe-cream":["質地超輕盈","滋潤柔滑肌膚"],
+ "lumiere-de-vie-daily-brightening-broad-spectrum-spf-50":["四種防曬成分，UVA＋UVB 高效防護","避免曬傷、泛紅及提早老化","紓緩、提亮、均勻膚色"]
+};
+P.forEach(p=>{ p.b = BEN[p.h]||[]; });
+
+const NEED = {
+  energy:"精神與活力", sleep:"睡眠品質", stress:"壓力與放鬆", weight:"體重管理", digest:"消化與順暢",
+  immune:"日常保護力", joint:"骨骼關節", eye:"眼睛保健", skin:"肌膚光采", heart:"循環保養",
+  aging:"青春與活力", exercise:"肌力與健身", diet:"營養均衡", detox:"體內環保", focus:"思緒保健", muscle:"肌肉放鬆",
+  s_dull:"膚色暗沉", s_lines:"細紋與彈性", s_dry:"乾燥缺水", s_sun:"日曬防護"
+};
+
+/* Each option adds points to needs, and records a short reason phrase. */
+const Q = [
+ {id:"age",title:"你的年齡層是？",hint:"不同年齡的保養重點不太一樣。",opts:[
+   {l:"18–29 歲",add:{}},
+   {l:"30–44 歲",add:{energy:.5,stress:.5}},
+   {l:"45–59 歲",add:{joint:1,eye:.8,heart:.8,aging:1},why:"45 歲後常見的保養重點"},
+   {l:"60 歲以上",add:{joint:2,heart:1.5,aging:2,eye:1},why:"熟齡族群的日常保養"}]},
+ {id:"goal",multi:3,title:"你的首要健康目標是？",hint:"最多選 3 項，越先選的越優先。",opts:[
+   {l:"消化健康",tag:"digest"},{l:"良好睡眠",tag:"sleep"},{l:"循環健康",tag:"heart"},{l:"肌力＆健身",tag:"exercise"},
+   {l:"體重管理",tag:"weight"},{l:"能量",tag:"energy"},{l:"體內環保",tag:"detox"},{l:"保護力",tag:"immune"},
+   {l:"靈活行動力",tag:"joint"},{l:"舒緩壓力",tag:"stress"},{l:"思緒保健",tag:"focus"},{l:"眼睛保健",tag:"eye"},{l:"肌膚保養",tag:"skin"}]},
+ {id:"sym",multi:12,optional:1,title:"最近有感覺到以下哪些變化？",hint:"可以複選；都沒有的話直接按「下一題」。",opts:[
+   {l:"暴飲暴食或對食物的渴望",add:{weight:2.5},why:"最近容易嘴饞、想吃東西"},
+   {l:"頭髮健康",add:{skin:1.5,diet:1},why:"在意頭髮狀態"},
+   {l:"行動力健康",add:{joint:2.5},why:"在意行動力"},
+   {l:"感到疲倦或不安",add:{energy:2,stress:1.5},why:"最近容易疲倦或不安"},
+   {l:"有皮膚問題",add:{skin:2.5},why:"有皮膚方面的困擾"},
+   {l:"肌膚乾燥",add:{skin:1.5,s_dry:3},why:"肌膚容易乾燥"},
+   {l:"偶爾胃部不舒服",add:{digest:2.5},why:"偶爾胃部不舒服"},
+   {l:"頭部不舒服",add:{stress:1.5,sleep:.5},why:"偶爾頭部不舒服"},
+   {l:"腦霧",add:{focus:3},why:"有腦霧、思緒不清的感覺"},
+   {l:"肌肉緊繃",add:{muscle:3},why:"肌肉容易緊繃"},
+   {l:"心跳不規則",add:{heart:1},why:"在意心跳狀況",flag:"heart"},
+   {l:"吃完飯後感覺疲倦",add:{digest:1.5,energy:1},why:"飯後容易疲倦"}]},
+ {id:"skin",when:a=>(a.goal||[]).includes(12)||(a.sym||[]).some(k=>k===4||k===5),title:"你最在意的肌膚狀況是？",hint:"因為你提到肌膚，多問一題。",opts:[
+   {l:"暗沉、不夠亮",add:{s_dull:4},why:"在意膚色暗沉"},
+   {l:"細紋、彈性不足",add:{s_lines:4},why:"在意細紋與彈性"},
+   {l:"乾燥、缺水",add:{s_dry:4},why:"肌膚容易乾燥"},
+   {l:"常曬太陽",add:{s_sun:4},why:"日常日曬多"}]},
+ {id:"diet",title:"你平常的飲食比較接近？",opts:[
+   {l:"外食為主，蔬果吃得少",add:{diet:3,digest:1},why:"外食多、蔬果攝取不足"},
+   {l:"常吃甜食、炸物或宵夜",add:{weight:1.5,digest:1.5},why:"飲食偏重口味"},
+   {l:"高蛋白、配合健身",add:{exercise:1.5},why:"有健身飲食習慣"},
+   {l:"大致均衡",add:{}}]},
+ {id:"move",title:"一週運動幾次？",opts:[
+   {l:"幾乎不運動",add:{weight:1,energy:1},why:"活動量偏少"},
+   {l:"1–2 次",add:{}},
+   {l:"3 次以上",add:{exercise:3},why:"運動量大，需要補給"}]},
+ {id:"sleep",title:"最近的睡眠狀況？",opts:[
+   {l:"一覺到天亮",add:{}},
+   {l:"不容易入睡",add:{sleep:3,stress:1},why:"不容易入睡"},
+   {l:"半夜容易醒",add:{sleep:2.5},why:"睡眠容易中斷"},
+   {l:"睡不到 6 小時",add:{energy:2,sleep:1},why:"睡眠時間不足"}]},
+ {id:"stress",title:"最近的壓力感受？",opts:[
+   {l:"輕鬆",add:{}},
+   {l:"偶爾緊繃",add:{stress:1.5}},
+   {l:"常常很大",add:{stress:3,energy:1},why:"長期壓力大"}]},
+ {id:"screen",title:"每天看手機、電腦的時間？",opts:[
+   {l:"4 小時以內",add:{}},
+   {l:"4–8 小時",add:{eye:1.5},why:"每天看螢幕 4 小時以上"},
+   {l:"8 小時以上",add:{eye:3},why:"每天看螢幕超過 8 小時"}]},
+ {id:"budget",title:"你比較想從哪種方式開始？",opts:[
+   {l:"先試單品",sub:"NT$1,500 以內為主",b:"single"},
+   {l:"直接用組合方案",sub:"一次搭配好",b:"kit"},
+   {l:"看推薦再決定",b:"any"}]}
+];
+
+const GOAL_WHY = {energy:"你想改善精神與活力",sleep:"你想改善睡眠",stress:"你想好好放鬆、紓解壓力",weight:"你想做體重管理",
+  digest:"你想讓消化更順暢",immune:"你想加強日常保護力",joint:"你在意關節與行動",eye:"你的眼睛容易疲勞",skin:"你在意肌膚狀態",heart:"你想保養循環",exercise:"你想加強肌力與健身",detox:"你想做體內環保",focus:"你想保養思緒、提升專注"};
+
+/* packaging shape per product, used for the illustrated tiles */
+const FORM = {
+ "prime-smart-release-magnesium-tablets":"bottle","gotrim-acts-with-ashwagandha":"bottle","limited-edition-rise-rest-system":"box",
+ "prime-creatine-monohydrate-with-taurine":"jar","prime-colostrum-with-lion-s-mane":"jar","shopping-annuity-brand-premium-protect-plus":"bottle",
+ "the-usuals-vitamin-c-citrus-plus-chewable-tablets-5824004twn":"bottle","opc-3-burst":"bottle","vision-health-care-kit":"box",
+ "prime-red-algae-extract-softgel-contains-astaxanthin":"bottle","isotonix-red-algae-extract-powder-contains-astaxanthin-packet":"sachet",
+ "joint-maintenance-kit":"box","essential-omega-iii-fish-oil-contains-vitamin-e-softgel":"bottle","isotonix-opc-3-beauty-blend":"bottle",
+ "prime-nad-contains-nicotinamide-and-d-ribose-tran-resveratrol":"sachet","chuchos-100-years-young-regimen":"box",
+ "isotonix-daily-essentials-trial-sized-marketing-packs-pack-of-10":"sachet","isotonix-greens-powder":"bottle",
+ "isotonix-digestive-enzymes-with-probiotics-trial-sized-marketing-packs-pack-of-10":"sachet","shopping-annuity-brand-premium-balanctea-5821476twn":"box",
+ "gotrim-detox-kit":"box","gotrim-nutrition-shakes":"jar","gotrim-core":"bottle","gotrim-fyf-challenge-kit":"box","gotrim-30-day-jump-start-kit":"box",
+ "tower-essential-amino-acids":"sachet","hydro1":"can","lumiere-de-vie-brightening-c-serum":"dropper","lumiere-de-vie-retinol-creme":"tube",
+ "lumiere-de-vie-ghk-cu-peptide-renewal-complex":"tube","lumiere-de-vie-hydrating-aloe-cream":"jar","lumiere-de-vie-daily-brightening-broad-spectrum-spf-50":"tube"
+};
+const TINT = {energy:"#B0823A",sleep:"#55648A",stress:"#7C6B93",weight:"#6B8656",digest:"#8E7B4C",immune:"#A0623F",joint:"#6F7882",eye:"#3C7774",
+  skin:"#AE7480",heart:"#94505A",aging:"#8C6B3A",exercise:"#4A6C88",diet:"#58784A",detox:"#5E7F4E",focus:"#5D6A9A",muscle:"#6F6A8E",s_dull:"#B48A4A",s_lines:"#AE7480",s_dry:"#4F8584",s_sun:"#B0823A"};
+const CAT = {energy:"活力",sleep:"睡眠",stress:"舒壓",weight:"體態",digest:"消化",immune:"保護力",joint:"行動",eye:"視界",skin:"美肌",heart:"循環",
+  aging:"青春",exercise:"運動",diet:"營養",detox:"環保",focus:"思緒",muscle:"放鬆",s_dull:"保養",s_lines:"保養",s_dry:"保養",s_sun:"防護"};
+
+function art(form, mark){
+  const L = `fill="var(--tint)"`, B = `fill="var(--paper)" stroke="var(--tint)" stroke-width="1.6"`;
+  const txt = (y)=>`<text x="50" y="${y}" text-anchor="middle" font-family="Cormorant Garamond,Georgia,serif" font-size="8.5" letter-spacing="1.6" fill="#fff">${mark}</text>`;
+  const s = {
+   bottle:`<rect x="35" y="6" width="30" height="16" rx="2" ${L}/><rect x="31" y="21" width="38" height="6" rx="1" ${B}/><rect x="22" y="27" width="56" height="86" rx="9" ${B}/><rect x="23" y="54" width="54" height="34" ${L}/>${txt(74)}<line x1="30" y1="96" x2="70" y2="96" stroke="var(--tint)" stroke-width="1" opacity=".5"/>`,
+   jar:`<rect x="14" y="30" width="72" height="16" rx="2" ${L}/><rect x="12" y="46" width="76" height="66" rx="7" ${B}/><rect x="13" y="62" width="74" height="30" ${L}/>${txt(80)}`,
+   tube:`<rect x="27" y="6" width="46" height="7" ${L}/><path d="M28 13H72L77 92H23Z" ${B}/><path d="M26 42H74L75.7 66H24.3Z" ${L}/>${txt(57)}<rect x="37" y="92" width="26" height="20" rx="2" ${L}/>`,
+   dropper:`<ellipse cx="50" cy="14" rx="9" ry="10" ${L}/><rect x="38" y="22" width="24" height="14" rx="2" ${L}/><rect x="24" y="36" width="52" height="76" rx="12" ${B}/><rect x="25" y="60" width="50" height="30" ${L}/>${txt(78)}`,
+   box:`<path d="M18 24L28 14H90L80 24Z" fill="var(--tint)" opacity=".55"/><path d="M80 24L90 14V102L80 112Z" fill="var(--tint)" opacity=".35"/><rect x="18" y="24" width="62" height="88" ${B}/><rect x="18" y="52" width="62" height="30" ${L}/>${txt(70)}`,
+   sachet:`<path d="M24 18l6.5-7 6.5 7 6.5-7 6.5 7 6.5-7 6.5 7 6.5-7 6.5 7V112H24Z" ${B}/><rect x="25" y="50" width="50" height="34" ${L}/>${txt(70)}<line x1="24" y1="28" x2="76" y2="28" stroke="var(--tint)" stroke-dasharray="2 3" stroke-width="1"/>`,
+   can:`<rect x="28" y="12" width="44" height="100" rx="6" ${B}/><ellipse cx="50" cy="16" rx="18" ry="3" fill="none" stroke="var(--tint)" stroke-width="1"/><rect x="29" y="40" width="42" height="50" ${L}/>${txt(68)}`
+  };
+  return `<svg viewBox="0 0 100 120" aria-hidden="true">${s[form]||s.bottle}</svg>`;
+}
+const markOf = v => v.normalize("NFD").replace(/[^A-Za-z0-9 ]/g,"").trim().split(/\s+/)[0].toUpperCase().slice(0,9) || "EDIT";
+
+let ans = {}, i = -1, t0 = 0, custName = "";
+/* ---------- store (店主) settings: carried in the customer link as ?s=&u=&m= ---------- */
+const enc = v=>btoa(unescape(encodeURIComponent(v))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const dec = v=>{try{return decodeURIComponent(escape(atob(v.replace(/-/g,"+").replace(/_/g,"/"))))}catch(e){return ""}};
+const LINE_RE=/^@?[A-Za-z0-9._-]{2,30}$/, SLUG_RE=/^[A-Za-z0-9_-]{2,40}$/, UID_RE=/^[A-Za-z0-9]{2,20}$/, MAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const STORE = (()=>{ try{
+  const q=new URLSearchParams(location.search), s=q.get("s")||"", u=q.get("u")||"", m=dec(q.get("m")||""), l=q.get("l")||"";
+  if(!SLUG_RE.test(s)) return null;
+  return {s, u:UID_RE.test(u)?u:"", m:MAIL_RE.test(m)?m:"", l:LINE_RE.test(l)?l:""};
+}catch(e){return null} })();
+const purl = h => STORE ? `https://www.markettaiwan.com.tw/${STORE.s}/products/${h}${STORE.u?`?credit_user=${STORE.u}`:""}` : SHOP+h;
+function loadOwner(){ try{return JSON.parse(localStorage.getItem("hq:owner")||"{}")}catch(e){return {}} }
+function saveOwner(o){ try{localStorage.setItem("hq:owner",JSON.stringify(o))}catch(e){} }
+function sendMail(to, data){
+  return fetch("https://formsubmit.co/ajax/"+encodeURIComponent(to),{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(data)})
+    .then(r=>r.json()).then(j=>{ if(String(j.success)!=="true") throw new Error(j.message||"failed"); return j; });
+}
+const app = document.getElementById("app");
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const visible = ()=>Q.filter(q=>!q.when||q.when(ans));
+const ARROW = `<span class="arrow" aria-hidden="true"></span>`;
+function setTimer(s){document.getElementById("timer").textContent=s}
+
+function intro(){
+  i=-1; ans={};
+  const ticks = Array.from({length:60},(_,k)=>{const a=k/60*Math.PI*2, r1=k%5?46:43.5, r2=48;
+    return `<line x1="${50+r1*Math.sin(a)}" y1="${50-r1*Math.cos(a)}" x2="${50+r2*Math.sin(a)}" y2="${50-r2*Math.cos(a)}" stroke="${k%5?"var(--hair)":"var(--muted)"}" stroke-width="${k%5?.5:.7}"/>`}).join("");
+  app.innerHTML = `<section class="intro fade">
+    <div class="copy">
+      <span class="label">PERSONAL WELLNESS CONSULTATION</span>
+      <h1>九個問題，<br>找到你的日常保養</h1>
+      <p class="lead">依照你的作息、飲食與想改善的地方，從官網保健、體態管理與保養產品中，挑出最適合你的三樣。最後一題作答完，結果立刻出現。</p>
+      ${STORE?`<p class="host">你的健康顧問：<b>${esc(STORE.s)}</b></p>
+      <div class="field" style="max-width:360px"><label for="cname">你的姓名</label><input id="cname" autocomplete="name" maxlength="30" value="${esc(custName)}" placeholder="例如：王小明"><span class="err" id="cerr"></span></div>
+      <p class="note" style="max-width:30em">作答完成後，你的姓名與測驗結果會傳送給這位顧問，方便為你說明推薦的產品。</p>`:""}
+      <div><button class="btn" id="go">開始測驗 ${ARROW}</button></div>
+      <div class="steps3">
+        <div><b>09</b><span>個生活與健康問題</span></div>
+        <div><b>60″</b><span>約一分鐘完成</span></div>
+        <div><b>03</b><span>樣推薦，附上理由</span></div>
+      </div>
+    </div>
+    <div class="dial" aria-hidden="true">
+      <svg viewBox="0 0 100 100">${ticks}<circle cx="50" cy="50" r="40" fill="none" stroke="var(--hair)" stroke-width=".4"/>
+        <path d="M50 10 A40 40 0 1 1 15.4 70" fill="none" stroke="var(--gold)" stroke-width="1"/></svg>
+      <div class="num"><b>60</b><span>SECONDS</span></div>
+    </div>
+  </section>`;
+  document.getElementById("go").onclick=()=>{
+    if(STORE){ const v=document.getElementById("cname").value.trim();
+      if(!v){ document.getElementById("cerr").textContent="請先填寫姓名"; document.getElementById("cname").focus(); return; }
+      custName=v; }
+    t0=performance.now();go(0)};
+  setTimer("");
+  if(STORE){ const c=document.getElementById("cname"); c.oninput=()=>{document.getElementById("cerr").textContent=""}; c.onkeydown=e=>{if(e.key==="Enter")document.getElementById("go").click()}; }
+  else ownerLink();
+}
+
+function ownerLink(){
+  const f=document.querySelector("footer.note"); let b=document.getElementById("ownerbtn");
+  if(!b){ b=document.createElement("button"); b.id="ownerbtn"; b.className="textlink"; b.textContent="店主專區：管理店主與 QR Code";
+    b.onclick=()=>setup(); const w=document.createElement("p"); w.style.marginTop="12px"; w.appendChild(b); f.appendChild(w); }
+}
+
+function owners(){ try{
+  let l=JSON.parse(localStorage.getItem("hq:owners")||"null");
+  if(!Array.isArray(l)){ const o=JSON.parse(localStorage.getItem("hq:owner")||"null"); l=o&&o.s?[o]:[]; }
+  return l.filter(o=>o&&SLUG_RE.test(o.s));
+}catch(e){return []} }
+function saveOwners(l){ try{localStorage.setItem("hq:owners",JSON.stringify(l))}catch(e){} }
+const linkFor = o => location.origin+location.pathname+"?"+new URLSearchParams({s:o.s,...(o.u?{u:o.u}:{}),...(o.m?{m:enc(o.m)}:{}),...(o.l?{l:o.l}:{})}).toString();
+
+function setup(editIx){
+  i=-1; setTimer("店主專區");
+  const list=owners(), editing = Number.isInteger(editIx) ? list[editIx] : null, o = editing||{};
+  app.innerHTML = `<section class="setup fade">
+    <span class="label">FOR STORE OWNERS</span>
+    <h2 tabindex="-1">店主專區</h2>
+    <p class="hint">選擇店主後會顯示專屬 QR Code。顧客用自己的手機掃描就能作答，推薦產品會連到該店主的店舖，結果也會寄到店主的 Email。</p>
+    ${list.length?`<div class="olist"><h3>已儲存的店主</h3>${list.map((x,ix)=>`
+      <div class="orow">
+        <button class="opick" data-ix="${ix}"><span class="oname">${esc(x.s)}</span><span class="omail">${esc(x.m||"未設定 Email")}${x.u?"・"+esc(x.u):""}</span></button>
+        <div class="oact"><button class="btn" data-qr="${ix}">QR Code</button><button class="textlink" data-ed="${ix}">編輯</button><button class="textlink" data-del="${ix}">刪除</button></div>
+      </div>`).join("")}</div>`:""}
+    <form id="sf" novalidate class="sform">
+      <h3>${editing?`編輯 ${esc(editing.s)}`:(list.length?"新增店主":"建立第一位店主")}</h3>
+      <div class="field"><label for="slug">店舖網址</label>
+        <div class="prefix"><span>markettaiwan.com.tw/</span><input id="slug" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(o.s||"")}" placeholder="dkstore"></div>
+        <span class="err" id="e-slug"></span></div>
+      <div class="field"><label for="uid">會員編號（選填，連結中 credit_user= 後面那段）</label>
+        <input id="uid" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${esc(o.u||"")}" placeholder="C1234567"><span class="err" id="e-uid"></span></div>
+      <div class="field"><label for="mail">接收測驗結果的 Email</label>
+        <input id="mail" type="email" autocomplete="email" value="${esc(o.m||"")}" placeholder="name@example.com"><span class="err" id="e-mail"></span></div>
+      <div class="field"><label for="line">LINE ID（選填，顧客可以直接用 LINE 找你要優惠）</label>
+        <input id="line" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(o.l||"")}" placeholder="例如 dkstore 或 @dkstore"><span class="err" id="e-line"></span></div>
+      <div class="actions"><button class="btn" type="submit">${editing?"儲存並顯示 QR Code":"儲存並產生 QR Code"} ${ARROW}</button>
+        <button class="back" type="button" id="sb">${editing?"取消":"← 回首頁"}</button></div>
+    </form>
+    <p class="note">店主紀錄存在這台裝置的瀏覽器裡。換手機或電腦使用時，需要再新增一次。</p>
+  </section>`;
+  document.getElementById("sb").onclick=()=> editing?setup():intro();
+  app.querySelectorAll("[data-qr],.opick").forEach(b=>b.onclick=()=>qrView(list[+(b.dataset.qr??b.dataset.ix)]));
+  app.querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>setup(+b.dataset.ed));
+  app.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    if(b.dataset.armed){ list.splice(+b.dataset.del,1); saveOwners(list); setup(); toast("已刪除"); return; }
+    b.dataset.armed="1"; b.textContent="確定刪除？"; b.style.color="#B2453A";
+    setTimeout(()=>{ if(b.isConnected){ delete b.dataset.armed; b.textContent="刪除"; b.style.color=""; } },4000);
+  });
+  document.getElementById("sf").onsubmit=e=>{
+    e.preventDefault();
+    const s=document.getElementById("slug").value.trim().replace(/^.*markettaiwan\.com\.tw\//,"").replace(/[/?#].*$/,""),
+          u=document.getElementById("uid").value.trim().toUpperCase(), m=document.getElementById("mail").value.trim(),
+          l=document.getElementById("line").value.trim().replace(/^https?:\/\/line\.me\/ti\/p\/~?/,"");
+    const dup = list.findIndex((x,ix)=>x.s.toLowerCase()===s.toLowerCase() && ix!==editIx);
+    const errs={slug:!SLUG_RE.test(s)?"請填寫英文、數字、- 或 _ 組成的店舖名稱":(dup>=0?"這個店舖已經存在，請直接選擇或編輯":""),
+                uid:!u||UID_RE.test(u)?"":"會員編號只能是英文和數字",mail:MAIL_RE.test(m)?"":"請填寫正確的 Email",line:!l||LINE_RE.test(l)?"":"LINE ID 只能是英文、數字、. _ - 或 @"};
+    for(const k in errs) document.getElementById("e-"+k).textContent=errs[k];
+    if(errs.slug||errs.uid||errs.mail||errs.line) return;
+    const rec={s,u,m,...(l?{l}:{})};
+    if(editing) list[editIx]=rec; else list.unshift(rec);
+    saveOwners(list); qrView(rec);
+  };
+  app.querySelector("h2").focus({preventScroll:true});
+}
+
+function qrView(o){
+  i=-1; setTimer("店主專區");
+  const link=linkFor(o);
+  let svg="";
+  try{ if(window.qrcode){ const q=qrcode(0,"M"); q.addData(link); q.make(); svg=q.createSvgTag({cellSize:8,margin:2,scalable:true}); } }catch(e){ svg=""; }
+  app.innerHTML = `<section class="qrv fade">
+    <span class="label">SCAN TO START</span>
+    <h2 tabindex="-1">用手機掃描，開始健康測驗</h2>
+    <p class="host">健康顧問：<b>${esc(o.s)}</b></p>
+    <div class="qrbox">${svg||`<p class="note">QR Code 載入失敗，請重新整理頁面，或直接複製下方連結傳給顧客。</p>`}</div>
+    <p class="note">打開手機相機對準 QR Code，點跳出的連結即可作答，約 60 秒完成。</p>
+    <div class="out">
+      <code id="lk"></code>
+      <div class="actions"><button class="btn" id="cl">複製連結</button><a class="link" id="ol" target="_blank" rel="noopener">開啟問卷 ${ARROW}</a></div>
+      ${o.m?`<p class="note">第一次使用請先寄一封測試信。系統會寄「Activate」確認信到 ${esc(o.m)}，點信中的按鈕啟用後，顧客的測驗結果才會寄到這個信箱。</p>
+      <div class="actions"><button class="btn ghost" id="tm">寄送測試信</button><span class="status" id="ts"></span></div>`:""}
+    </div>
+    <div><button class="back" id="qb">← 選擇其他店主</button></div>
+  </section>`;
+  document.getElementById("lk").textContent=link; document.getElementById("ol").href=link;
+  document.getElementById("cl").onclick=()=>copyText(link,"已複製連結");
+  document.getElementById("qb").onclick=()=>setup();
+  const tm=document.getElementById("tm");
+  if(tm) tm.onclick=()=>{
+    const st=document.getElementById("ts"); st.className="status"; st.textContent="傳送中…";
+    sendMail(o.m,{_subject:`【健康選品｜${o.s}】測試信`,_template:"table",_captcha:"false","店舖":o.s,"說明":"這是測試信。收到這封信代表顧客的測驗結果可以正常寄到你的信箱。"})
+      .then(()=>{st.className="status ok";st.textContent="已送出。若是第一次使用，請到信箱點「Activate」啟用。"})
+      .catch(()=>{st.textContent="送不出去。請確認網站已放在你自己的網址上（預覽畫面無法寄信），再試一次。"});
+  };
+  window.scrollTo({top:0}); app.querySelector("h2").focus({preventScroll:true});
+}
+
+function go(n){ i=n; render(); window.scrollTo({top:0}); }
+
+function render(){
+  const qs = visible(), q = qs[i];
+  if(!q){ return result(); }
+  const total = qs.length, cur = ans[q.id];
+  setTimer(`QUESTION ${String(i+1).padStart(2,"0")}`);
+  const sel = k => q.multi ? (cur||[]).includes(k) : cur===k;
+  const last = i===total-1;
+  const showNext = q.multi || cur!==undefined;
+  app.innerHTML = `<section class="q fade">
+    <div class="prog"><span class="n">${String(i+1).padStart(2,"0")}<small> / ${String(total).padStart(2,"0")}</small></span><div class="bar"><i style="width:${((i+1)/total*100).toFixed(1)}%"></i></div></div>
+    <div class="qhead"><h2 id="qt">${esc(q.title)}</h2>${q.hint?`<p class="hint">${esc(q.hint)}</p>`:""}</div>
+    <div class="opts ${q.opts.length>6?"grid":""}" role="group" aria-labelledby="qt">
+      ${q.opts.map((o,k)=>`<button class="opt" data-k="${k}" aria-pressed="${sel(k)}"><span class="k">${q.multi&&sel(k)?(q.id==="goal"?cur.indexOf(k)+1:"✓"):String.fromCharCode(97+k)}</span><span>${esc(o.l)}${o.sub?`<small>${esc(o.sub)}</small>`:""}</span></button>`).join("")}
+    </div>
+    <div class="nav">
+      <button class="back" id="back">← ${i===0?"回首頁":"上一題"}</button>
+      ${showNext?`<button class="btn" id="next" ${q.multi&&!q.optional&&!(cur||[]).length?"disabled":""}>${last?"查看我的結果":"下一題"} ${ARROW}</button>`:""}
+    </div>
+  </section>`;
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(q,+b.dataset.k));
+  document.getElementById("back").onclick=()=> i===0?intro():go(i-1);
+  const nx=document.getElementById("next"); if(nx) nx.onclick=()=>go(i+1);
+}
+
+function pick(q,k){
+  if(q.multi){
+    let a = ans[q.id] ? ans[q.id].slice() : [];
+    if(a.includes(k)) a=a.filter(x=>x!==k);
+    else { a.push(k); if(a.length>q.multi) a.shift(); }
+    ans[q.id]=a;
+    if(!visible().some(x=>x.id==="skin")) delete ans.skin;
+    render();
+    const b=app.querySelector(`.opt[data-k="${k}"]`); if(b) b.focus({preventScroll:true});
+  } else {
+    ans[q.id]=k; render();
+    setTimeout(()=>go(i+1),220);
+  }
+}
+
+/* ---------- scoring: runs in the browser, takes about 1 ms ---------- */
+function score(){
+  const need = {}, why = {};
+  const bump=(tag,v,reason)=>{need[tag]=(need[tag]||0)+v; if(reason){(why[tag]=why[tag]||[]).push(reason)}};
+  (ans.goal||[]).forEach((k,ix)=>{const tag=Q[1].opts[k].tag; bump(tag, [5,4,3][ix]||3, GOAL_WHY[tag]);});
+  for(const q of visible()){
+    if(q.id==="goal"||q.id==="budget"||ans[q.id]===undefined) continue;
+    const ks = q.multi ? ans[q.id] : [ans[q.id]];
+    for(const k of ks){ const o=q.opts[k]; for(const [tag,v] of Object.entries(o.add||{})) bump(tag,v,o.why); }
+  }
+  const budget = Q[Q.length-1].opts[ans.budget]?.b || "any";
+  const ranked = P.map(p=>{
+    let s=0; const contrib=[];
+    for(const [tag,w] of Object.entries(p.t)){ const c=(need[tag]||0)*w; if(c>0){s+=c;contrib.push([tag,c]);} }
+    if(budget==="single"){ if(p.p<=1500) s*=1.15; if(p.p>3000) s*=.6; }
+    if(budget==="kit"){ if(p.kit) s*=1.25; }
+    contrib.sort((a,b)=>b[1]-a[1]);
+    const main = Object.entries(p.t).sort((a,b)=>b[1]-a[1])[0][0];
+    return {p,s,main:contrib[0]?.[0]||main,home:main,contrib};
+  }).filter(r=>r.s>0).sort((a,b)=>b.s-a.s);
+  const picks=[], used={};
+  const fam=t=>t.startsWith("s_")?"skin":t;
+  for(const r of ranked){ if(picks.length>=3) break; const f=fam(r.main); if(!used[f]){picks.push(r);used[f]=1;} }
+  for(const r of ranked){ if(picks.length>=3) break; if(!picks.includes(r)) picks.push(r); }
+  const rest = ranked.filter(r=>!picks.includes(r)).slice(0,4);
+  const max = picks[0]?.s || 1;
+  const needs = Object.entries(need).filter(([t])=>!t.startsWith("s_")).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  return {need,why,picks,rest,max,needs,budget};
+}
+
+function reasons(r,why){
+  const out=[];
+  for(const [tag] of r.contrib){ for(const w of (why[tag]||[])){ if(!out.includes(w)) out.push(w); if(out.length>=2) break;} if(out.length>=2) break; }
+  if(!out.length) out.push(`對應你的「${NEED[r.main]}」需求`);
+  return out;
+}
+
+const money = n=>"NT$ "+n.toLocaleString("en-US");
+const tintStyle = r=>`--tint:${TINT[r.home]||"#34503F"}`;
+function tile(r){
+  const p=r.p;
+  return `<a class="tile" href="${purl(p.h)}" target="_blank" rel="noopener" aria-label="到官網查看 ${esc(p.n)}" style="${tintStyle(r)}"><span class="tag">${esc(CAT[r.home]||"")}</span>${art(FORM[p.h],markOf(p.v))}${p.img?`<img src="${CDN}${p.img}?width=480" alt="${esc(p.n)}" loading="lazy" onerror="this.remove()">`:""}</a>`;
+}
+const pct = (r,R)=>Math.round(60+38*r.s/R.max);
+
+function result(){
+  const ts=performance.now();
+  const R=score();
+  const ms=Math.max(1,Math.round(performance.now()-ts));
+  setTimer(`完成・${Math.round((performance.now()-t0)/1000)} 秒`);
+  const record = {
+    version:1, createdAt:new Date().toISOString(), customer:custName||undefined, store:STORE?.s,
+    answers:Object.fromEntries(visible().map(q=>[q.id, q.multi?(ans[q.id]||[]).map(k=>q.opts[k].l):q.opts[ans[q.id]]?.l])),
+    focus:R.needs.map(([t])=>NEED[t]),
+    recommendations:R.picks.map(r=>({name:r.p.n,handle:r.p.h,url:purl(r.p.h),match:pct(r,R)}))
+  };
+  window.quizResult = record; // for future syncing to other sites
+  try{ localStorage.setItem("hq:last", JSON.stringify(record)); }catch(e){}
+  const nmax = R.needs[0]?.[1]||1;
+  const [a,...others] = R.picks;
+  const body = (r,ix,big)=>`<div class="pbody">
+      <div class="rank"><span class="label">${ix===0?"首選推薦":"推薦 0"+(ix+1)}</span><span class="match">${pct(r,R)}%<small>符合</small></span></div>
+      <div><div class="pname">${esc(r.p.n)}</div><div class="vendor">${esc(r.p.v)}${r.p.kit?"・組合方案":""}</div></div>
+      ${r.p.b&&r.p.b.length?`<div class="help"><span class="hl">能幫你</span><ul>${r.p.b.slice(0,big?4:3).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
+      <div class="whyw"><span class="hl">為什麼推薦給你</span><ul class="why">${reasons(r,R.why).map(w=>`<li>${esc(w)}</li>`).join("")}</ul></div>
+      ${big?`<p class="quote">「${esc(r.p.d)}」<br><span class="vendor" style="font-family:var(--f-sans)">官網介紹</span></p>`:""}
+      <div class="pfoot"><span class="price">${money(r.p.p)}<small>起</small></span>
+        <a class="link" href="${purl(r.p.h)}" target="_blank" rel="noopener">到官網查看 ${ARROW}</a></div>
+    </div>`;
+
+  app.innerHTML = `<section class="res fade">
+    <div class="rx">
+      <div class="copy">
+        <span class="label">YOUR WELLNESS PROFILE</span>
+        <h2 tabindex="-1">${R.needs.length?`先從「${esc(NEED[R.needs[0][0]])}」開始，<br>最容易感受到改變`:"你的狀態不錯，<br>從基礎營養開始就好"}</h2>
+        <p class="sub">以下是依照你的回答挑選的三樣產品，以及挑選的理由。</p>
+        ${(ans.sym||[]).includes(10)?`<p class="note" style="border-left:2px solid var(--gold);padding-left:10px">你提到心跳不規則。這類狀況建議先請醫師檢查，保健食品不能取代醫療診斷。</p>`:""}
+        <span class="speed">推薦計算時間 ${ms} 毫秒</span>
+      </div>
+      <div class="meters" aria-label="你的保養重點">
+        ${R.needs.map(([t,v])=>`<div class="meter"><span>${esc(NEED[t])}</span><span class="t"><i style="width:${Math.round(v/nmax*100)}%"></i></span></div>`).join("")}
+      </div>
+    </div>
+    ${a?`<article class="feature">${tile(a)}${body(a,0,true)}</article>`:""}
+    ${others.length?`<div class="pair">${others.map((r,ix)=>`<article class="card">${tile(r)}${body(r,ix+1,false)}</article>`).join("")}</div>`:""}
+    ${R.rest.length?`<div class="more"><h3>也可以考慮</h3>${R.rest.map(r=>`<a href="${purl(r.p.h)}" target="_blank" rel="noopener"><span class="mini" style="${tintStyle(r)}">${art(FORM[r.p.h],"")}</span><span class="mn">${esc(r.p.n)}<span>${esc(NEED[r.main])}</span></span><span class="price">${money(r.p.p)}</span></a>`).join("")}</div>`:""}
+    ${deal(R)}
+    <div class="closing">
+      <div class="sync">
+        <span class="label">SYNC</span>
+        <strong style="font-family:var(--f-serif);font-weight:600">同步到會員網站</strong>
+        <p class="note">之後可以登入帳號，把這次的結果自動存到你的挑戰計畫與健康紀錄。目前結果已先保存在這台裝置上。</p>
+        <div class="row"><span class="pill">蘇打餅・即將開放</span><span class="pill">達爾文・即將開放</span></div>
+      </div>
+      <div class="sync" style="justify-content:space-between">
+        <span class="label">SHARE</span>
+        <p class="note">${STORE?.m?`<span class="status" id="ms">正在把結果傳送給你的顧問 ${esc(STORE.s)}…</span>`:"把結果複製下來，傳給你的健康顧問或朋友。"}</p>
+        <div class="actions"><button class="btn" id="copy">複製我的結果</button><button class="back" id="again">重新測驗</button></div>
+      </div>
+    </div>
+  </section>`;
+  document.getElementById("again").onclick=intro;
+  document.getElementById("copy").onclick=()=>copy(record);
+  document.getElementById("ask").onclick=()=>copyText(askText(),"已複製，貼給你的顧問就可以了");
+  if(STORE?.m && !record._sent){
+    const ms=document.getElementById("ms");
+    const data={_subject:`【健康選品｜${STORE.s}】${custName} 的測驗結果`,_template:"table",_captcha:"false",
+      "店舖":STORE.s,"顧客姓名":custName,"測驗時間":new Date().toLocaleString("zh-TW",{hour12:false}),"保養重點":record.focus.join("、")};
+    record.recommendations.forEach((r,ix)=>data[`推薦 ${ix+1}`]=`${r.name}（符合 ${r.match}%） ${r.url}`);
+    visible().forEach(q=>{ const v=record.answers[q.id]; if(v) data["作答｜"+q.title]=Array.isArray(v)?v.join("、"):v; });
+    record._sent=true;
+    sendMail(STORE.m,data).then(()=>{ms.className="status ok";ms.textContent=`已把結果傳送給你的顧問 ${STORE.s}，顧問會再跟你聯絡。`})
+      .catch(()=>{ms.textContent="結果沒有傳送成功。請按「複製我的結果」，再傳給你的顧問。"});
+  }
+  window.scrollTo({top:0}); app.querySelector("h2").focus({preventScroll:true});
+}
+
+const DEAL_LINES = [
+  n=>`健康無價，但優惠可以有價 😆<br>跟 <b>${n}</b> 撒個嬌、要一下優惠吧，相信${n}不會讓你失望的！`,
+  n=>`偷偷告訴你：只要說一句「我做完測驗了」，<br><b>${n}</b> 很可能就心軟給你優惠了 🤫`,
+  n=>`還在猶豫嗎？猶豫的時候最適合做一件事：<br>跟 <b>${n}</b> 討個優惠 🙌`
+];
+function deal(R){
+  const n = STORE ? esc(STORE.s) : "介紹你來的顧問";
+  const line = DEAL_LINES[Math.floor(Math.random()*DEAL_LINES.length)](n);
+  return `<div class="deal">
+    <span class="label">SPECIAL OFFER</span>
+    <p class="dealh">${line}</p>
+    <p class="note">不急著決定也完全沒關係，先把結果收著，想清楚了再找${n}聊聊就好。</p>
+    <div class="actions">
+      ${STORE&&STORE.l?`<a class="btn" href="${STORE.l.startsWith("@")?"https://line.me/R/ti/p/"+encodeURIComponent(STORE.l):"https://line.me/ti/p/~"+encodeURIComponent(STORE.l)}" target="_blank" rel="noopener">用 LINE 要優惠 ${ARROW}</a>`:""}
+      <button class="${STORE&&STORE.l?"btn ghost":"btn"}" id="ask">複製「要優惠」訊息</button>
+    </div>
+  </div>`;
+}
+function askText(){
+  const r=window.quizResult, top=r?.recommendations?.[0]?.name||"推薦的產品";
+  return `嗨${STORE?" "+STORE.s:""}～我是${custName||"剛做完健康測驗的朋友"}，剛做完健康測驗，系統推薦我「${top}」。聽說找你可以拿到優惠？拜託拜託 🙏`;
+}
+function copy(rec){
+  const txt = `【健康選品 測驗結果】\n保養重點：${rec.focus.join("、")}\n` +
+    rec.recommendations.map((r,ix)=>`${ix+1}. ${r.name}（符合 ${r.match}%）\n   ${r.url}`).join("\n");
+  const done=()=>toast("已複製，可以貼給你的顧問或朋友");
+  if(navigator.clipboard?.writeText){ navigator.clipboard.writeText(txt).then(done,()=>fallback(txt)); } else fallback(txt);
+}
+function copyText(txt,msg){ if(navigator.clipboard?.writeText){ navigator.clipboard.writeText(txt).then(()=>toast(msg),()=>fallback(txt)); } else fallback(txt); }
+function fallback(txt){
+  const ta=document.createElement("textarea"); ta.value=txt; ta.setAttribute("readonly",""); ta.style.cssText="position:fixed;opacity:0";
+  document.body.appendChild(ta); ta.select(); let ok=false; try{ok=document.execCommand("copy")}catch(e){}
+  ta.remove(); toast(ok?"已複製":"無法自動複製，請手動選取");
+}
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),2200)}
+
+document.addEventListener("keydown",e=>{
+  if(i<0||e.metaKey||e.ctrlKey||e.altKey||/INPUT|TEXTAREA/.test(e.target.tagName)) return; const q=visible()[i]; if(!q||e.key.length!==1) return;
+  const k=e.key.toLowerCase().charCodeAt(0)-97;
+  if(k>=0 && k<q.opts.length){ pick(q,k); }
+});
+
+if(!STORE && location.hash==="#owner") setup(); else intro();
+})();
+</script>
