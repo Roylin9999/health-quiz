@@ -254,6 +254,17 @@ async function api(request, env, url, ctx) {
     return json({ ok: true, deleted: r.meta?.changes || 0 });
   }
 
+  // 挑戰計劃網站刪除一筆問卷（測試資料等），同樣用收件鑰匙 INBOX_KEY，只能刪同步店舖的
+  if (m === "DELETE" && (mm = p.match(/^\/api\/sync\/results\/hq-([A-Za-z0-9_-]+)-(\d+)$/))) {
+    const key = request.headers.get("x-inbox-key") || "";
+    if (!env.INBOX_KEY || !safeEqual(key, env.INBOX_KEY)) return err(401, "收件鑰匙不正確");
+    const stores = String(env.SYNC_STORE || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
+    const store = mm[1].toLowerCase();
+    if (!stores.includes(store)) return err(403, "這個店舖沒有開放同步");
+    const r = await env.DB.prepare("DELETE FROM results WHERE id = ? AND store = ?").bind(+mm[2], store).run();
+    return json({ ok: true, deleted: r.meta?.changes || 0 });
+  }
+
   // 管理者（Roy）：看全部店主與紀錄，需要密鑰 ADMIN_KEY
   if (m === "GET" && p === "/api/admin/results") {
     if (!isAdmin(request, env)) return err(401, "管理密鑰不正確");
