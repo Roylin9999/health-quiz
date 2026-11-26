@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>60 秒健康選品</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="回答 8 題，立即得到適合你的保健與保養產品建議。">
+<meta name="description" content="回答 9 題，立即得到適合你的保健與保養產品建議。">
+<meta property="og:title" content="60 秒健康選品">
+<meta property="og:description" content="回答 9 題，立即得到適合你的保健與保養產品建議。">
+<meta property="og:image" content="https://health-quiz.wellstoryhall.com/img/og.jpg">
+<meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
@@ -13,24 +17,20 @@
 /* Layout: an apothecary-style consultation. Quiet stone ground, serif questions, hairline rules;
    the result reads like a personal prescription card with illustrated product tiles. */
 :root{
-  --bg:#F1F0EC; --paper:#FBFAF7; --ink:#1D211E; --muted:#4F534D; --hair:#D2D0C7;
-  --moss:#34503F; --moss-ink:#F6F4EE; --moss-soft:#E4E8E1; --gold:#A8875A; --gold-soft:#EFE7DA;
+  --bg:#F3ECDC; --paper:#FCF8EE; --ink:#2B2A22; --muted:#55513F; --hair:#DCCDAE;
+  --moss:#34503F; --moss-ink:#F8F3E6; --moss-soft:#E6E7D6; --gold:#9C7A45; --gold-soft:#F2E6CF;
   --f-serif:"Noto Serif TC","Songti TC","PMingLiU",serif;
   --f-sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --f-num:"Cormorant Garamond","Noto Serif TC",Georgia,serif;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#141715; --paper:#1B1F1C; --ink:#F2F0EA; --muted:#C2C5BD; --hair:#30352F;
-  --moss:#9DBBA6; --moss-ink:#141715; --moss-soft:#243029; --gold:#CDB088; --gold-soft:#2E2820; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#141715; --paper:#1B1F1C; --ink:#F2F0EA; --muted:#C2C5BD; --hair:#30352F;
-  --moss:#9DBBA6; --moss-ink:#141715; --moss-soft:#243029; --gold:#CDB088; --gold-soft:#2E2820; color-scheme:dark}
+/* 慕夏（新藝術）風格裝飾：圖片在 img/，皆為壓縮過的 webp */
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:400 17px/1.75 var(--f-sans);letter-spacing:.01em;
+body{background-color:var(--bg);background-image:linear-gradient(rgba(243,236,220,.86),rgba(243,236,220,.86)),url(img/pattern.webp);background-size:auto,340px;color:var(--ink);font:400 17px/1.75 var(--f-sans);letter-spacing:.01em;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 56px;
   -webkit-font-smoothing:antialiased}
 .wrap{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
-header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--hair)}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:30px;background:url(img/divider.webp) center bottom/min(520px,92%) auto no-repeat}
 .brand{display:flex;align-items:baseline;gap:10px;font:600 17px/1 var(--f-serif);letter-spacing:.08em}
 .brand em{font:italic 500 15px/1 var(--f-num);color:var(--gold);letter-spacing:.04em}
 .timer{font-size:13px;font-weight:500;letter-spacing:.18em;color:var(--muted)}
@@ -64,7 +64,13 @@ h2:focus{outline:none}
 .steps3 div+div{padding-left:14px;border-left:1px solid var(--hair)}
 .steps3 b{font:500 26px/1 var(--f-num);color:var(--moss)}
 .steps3 span{font-size:14px;font-weight:500;color:var(--muted);line-height:1.5}
-@media (max-width:680px){.intro{grid-template-columns:1fr;gap:24px}.dial{max-width:200px;order:-1}}
+.hero{position:relative;width:100%;max-width:360px;justify-self:center;aspect-ratio:3/3.6;border-radius:999px 999px 6px 6px;overflow:hidden;
+  border:1px solid var(--gold);box-shadow:0 0 0 6px var(--paper),0 0 0 7px var(--hair)}
+.hero img{width:100%;height:100%;object-fit:cover;object-position:50% 12%;display:block}
+.hero .sec{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:var(--paper);border:1px solid var(--gold);padding:8px 16px 6px;text-align:center;white-space:nowrap}
+.hero .sec b{font:600 30px/1 var(--f-num);color:var(--moss)}
+.hero .sec span{display:block;font:600 11px/1.4 var(--f-sans);letter-spacing:.3em;color:var(--gold)}
+@media (max-width:680px){.intro{grid-template-columns:1fr;gap:24px}.hero{max-width:250px;order:-1}}
 /* question */
 .q{display:flex;flex-direction:column;gap:28px;max-width:680px;margin:0 auto;width:100%;padding-block:clamp(8px,3vw,32px)}
 .prog{display:flex;align-items:center;gap:16px}
@@ -91,6 +97,11 @@ h2:focus{outline:none}
 .back:hover{color:var(--ink)}
 /* result */
 .res{display:flex;flex-direction:column;gap:40px}
+.medals{display:flex;justify-content:center;gap:clamp(10px,3vw,26px);padding:clamp(26px,7%,48px) 12% clamp(18px,5%,34px);background:url(img/result-frame.webp) center/100% 100% no-repeat;aspect-ratio:3/2;align-items:center;max-width:520px;width:100%;margin:0 auto}
+.medal{display:flex;flex-direction:column;align-items:center;gap:6px;flex:0 0 26%;min-width:0;max-width:120px}
+.medal img{width:100%;height:auto;aspect-ratio:1;display:block}
+.medal span{font:600 13px/1.3 var(--f-serif);color:var(--ink);text-align:center}
+.tile img.medal-s{position:absolute;inset:auto 10px 10px auto;width:clamp(44px,14%,64px);height:auto;aspect-ratio:1;padding:0;background:none;object-fit:contain;z-index:2;filter:drop-shadow(0 1px 2px rgba(60,40,10,.25))}
 .rx{display:grid;grid-template-columns:1fr 280px;gap:36px;align-items:end;padding-bottom:28px;border-bottom:1px solid var(--hair)}
 .rx .copy{display:flex;flex-direction:column;gap:14px;min-width:0}
 .rx .sub{color:var(--muted)}
@@ -101,6 +112,10 @@ h2:focus{outline:none}
 .meter:first-child .t i{background:var(--gold)}
 .speed{font-size:13px;font-weight:500;letter-spacing:.14em;color:var(--muted)}
 @media (max-width:680px){.rx{grid-template-columns:1fr;gap:24px}}
+.feature,.card,.deal,.sync{position:relative}
+.feature::before,.feature::after,.card::before,.card::after{content:"";position:absolute;width:clamp(54px,9vw,84px);aspect-ratio:1;background:url(img/corner.webp) 0 0/contain no-repeat;pointer-events:none}
+.feature::before,.card::before{left:-4px;top:-4px}
+.feature::after,.card::after{right:-4px;bottom:-4px;transform:rotate(180deg)}
 .feature{display:grid;grid-template-columns:minmax(0,320px) 1fr;gap:clamp(20px,4vw,44px);background:var(--paper);border:1px solid var(--hair);padding:clamp(18px,3.5vw,36px)}
 .feature .tile{aspect-ratio:1}
 @media (max-width:680px){.feature{grid-template-columns:1fr}.feature .tile{aspect-ratio:4/3}}
@@ -148,7 +163,7 @@ h2:focus{outline:none}
 .sync .row{display:flex;gap:8px;flex-wrap:wrap}
 .pill{border:1px solid var(--hair);padding:5px 12px;font-size:13px;font-weight:500;letter-spacing:.12em;color:var(--muted)}
 .note{font-size:14px;line-height:1.8;color:var(--muted);font-weight:500}
-footer.note{border-top:1px solid var(--hair);padding-top:16px}
+footer.note{padding-top:40px;background:url(img/divider.webp) center top/min(520px,92%) auto no-repeat}
 a.tile{text-decoration:none;cursor:pointer}
 a.tile svg,a.tile img{transition:transform .35s ease}
 a.tile:hover svg,a.tile:hover img{transform:scale(1.04)}
@@ -180,12 +195,16 @@ a.tile:hover svg,a.tile:hover img{transform:scale(1.04)}
 .sform{display:flex;flex-direction:column;gap:18px}
 .qrv{max-width:560px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;padding-block:clamp(8px,3vw,28px)}
 .qrv .out{width:100%;text-align:left}
-.qrbox{background:#fff;padding:18px;border:1px solid var(--hair);width:min(100%,340px);aspect-ratio:1;display:grid;place-items:center}
+.qrbox{background:url(img/qr-frame.webp) center/100% 100% no-repeat;padding:15%;width:min(100%,360px);aspect-ratio:1;display:grid;place-items:center}
+.qrbox>*{background:#fff;padding:6px}
 .qrbox svg{width:100%;height:100%;display:block}
 .hl{display:block;font-size:13px;font-weight:600;letter-spacing:.16em;color:var(--muted);margin-bottom:6px}
 .help ul{margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
 .help li{list-style:none;background:var(--moss-soft);color:var(--ink);padding:4px 10px;font-size:15px;font-weight:500;line-height:1.5}
-.deal{background:var(--gold-soft);border:1px solid var(--gold);padding:clamp(20px,4vw,36px);display:flex;flex-direction:column;gap:14px}
+.deal{background:var(--gold-soft);border:1px solid var(--gold);padding:clamp(20px,4vw,36px);display:grid;grid-template-columns:160px 1fr;gap:clamp(16px,3vw,32px);align-items:center}
+.deal .art{width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:999px 999px 4px 4px;border:1px solid var(--gold);display:block}
+.deal .dtext{display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (max-width:560px){.deal{grid-template-columns:1fr}.deal .art{max-width:150px;justify-self:center}}
 .dealh{font:600 clamp(19px,3vw,24px)/1.6 var(--f-serif);letter-spacing:.02em}
 .dealh b{color:var(--moss);font-weight:700}
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--hair);flex-wrap:wrap}
@@ -420,6 +439,10 @@ async function api(path,opt={}){
 }
 if(STORE && API_ON){ api("/api/store/"+encodeURIComponent(STORE.s)).then(j=>{ STORE.u=j.store.credit_user||STORE.u; STORE.l=j.store.line||STORE.l; if(j.store.name){ STORE.n=j.store.name; document.querySelectorAll(".hostname").forEach(e=>e.textContent=STORE.n); } }).catch(()=>{}); }
 const hostName = ()=> STORE ? (STORE.n || STORE.s) : "";   /* 顧客看到的店主稱呼；沒填就用店舖名稱 */
+/* 保養重點小圓章：沒有專屬圖的需求借用相近的 */
+const MEDAL = {digest:1,sleep:1,heart:1,exercise:1,weight:1,energy:1,detox:1,immune:1,joint:1,stress:1,focus:1,eye:1,skin:1};
+const MEDAL_ALIAS = {muscle:"exercise",diet:"digest",aging:"skin",s_dull:"skin",s_lines:"skin",s_dry:"skin",s_sun:"skin"};
+const medalSrc = t => { const k = MEDAL[t] ? t : MEDAL_ALIAS[t]; return k ? `img/need-${k}.webp` : ""; };
 const purl = h => STORE ? `https://www.markettaiwan.com.tw/${STORE.s}/products/${h}${STORE.u?`?credit_user=${STORE.u}`:""}` : SHOP+h;
 function loadOwner(){ try{return JSON.parse(localStorage.getItem("hq:owner")||"{}")}catch(e){return {}} }
 function saveOwner(o){ try{localStorage.setItem("hq:owner",JSON.stringify(o))}catch(e){} }
@@ -435,8 +458,6 @@ function setTimer(s){document.getElementById("timer").textContent=s}
 
 function intro(){
   i=-1; ans={};
-  const ticks = Array.from({length:60},(_,k)=>{const a=k/60*Math.PI*2, r1=k%5?46:43.5, r2=48;
-    return `<line x1="${50+r1*Math.sin(a)}" y1="${50-r1*Math.cos(a)}" x2="${50+r2*Math.sin(a)}" y2="${50-r2*Math.cos(a)}" stroke="${k%5?"var(--hair)":"var(--muted)"}" stroke-width="${k%5?.5:.7}"/>`}).join("");
   app.innerHTML = `<section class="intro fade">
     <div class="copy">
       <span class="label">PERSONAL WELLNESS CONSULTATION</span>
@@ -452,11 +473,8 @@ function intro(){
         <div><b>03</b><span>樣推薦，附上理由</span></div>
       </div>
     </div>
-    <div class="dial" aria-hidden="true">
-      <svg viewBox="0 0 100 100">${ticks}<circle cx="50" cy="50" r="40" fill="none" stroke="var(--hair)" stroke-width=".4"/>
-        <path d="M50 10 A40 40 0 1 1 15.4 70" fill="none" stroke="var(--gold)" stroke-width="1"/></svg>
-      <div class="num"><b>60</b><span>SECONDS</span></div>
-    </div>
+    <div class="hero"><img src="img/hero.webp" alt="新藝術風格插畫：手持草本精華瓶的女子" width="820" height="1093" fetchpriority="high">
+      <div class="sec" aria-hidden="true"><b>60″</b><span>SECONDS</span></div></div>
   </section>`;
   document.getElementById("go").onclick=()=>{
     if(STORE){ const v=document.getElementById("cname").value.trim();
@@ -857,7 +875,7 @@ const money = n=>"NT$ "+n.toLocaleString("en-US");
 const tintStyle = r=>`--tint:${TINT[r.home]||"#34503F"}`;
 function tile(r){
   const p=r.p;
-  return `<a class="tile" href="${purl(p.h)}" target="_blank" rel="noopener" aria-label="到官網查看 ${esc(p.n)}" style="${tintStyle(r)}"><span class="tag">${esc(CAT[r.home]||"")}</span>${art(FORM[p.h],markOf(p.v))}${p.img?`<img src="${CDN}${p.img}?width=480" alt="${esc(p.n)}" loading="lazy" onerror="this.remove()">`:""}</a>`;
+  return `<a class="tile" href="${purl(p.h)}" target="_blank" rel="noopener" aria-label="到官網查看 ${esc(p.n)}" style="${tintStyle(r)}"><span class="tag">${esc(CAT[r.home]||"")}</span>${medalSrc(r.home)?`<img class="medal-s" src="${medalSrc(r.home)}" alt="" loading="lazy">`:""}${art(FORM[p.h],markOf(p.v))}${p.img?`<img src="${CDN}${p.img}?width=480" alt="${esc(p.n)}" loading="lazy" onerror="this.remove()">`:""}</a>`;
 }
 /* 符合度：依分數換算，並照推薦順序遞減（首選最高） */
 const pct = (r,R)=>{ if(!R._pct){ let prev=99; R._pct=new Map(R.picks.map(x=>{ const v=Math.min(prev, Math.round(60+38*x.s/R.max)); prev=v-2; return [x,v]; })); }
@@ -888,7 +906,9 @@ function result(){
         <a class="link" href="${purl(r.p.h)}" target="_blank" rel="noopener">到官網查看 ${ARROW}</a></div>
     </div>`;
 
+  const medals = R.needs.filter(([t])=>medalSrc(t)).slice(0,3);
   app.innerHTML = `<section class="res fade">
+    ${medals.length?`<div class="medals" aria-label="你的保養重點">${medals.map(([t])=>`<div class="medal"><img src="${medalSrc(t)}" alt="" width="240" height="240"><span>${esc(NEED[t])}</span></div>`).join("")}</div>`:""}
     <div class="rx">
       <div class="copy">
         <span class="label">YOUR WELLNESS PROFILE</span>
@@ -944,7 +964,7 @@ const DEAL_LINES = [
 function deal(R){
   const n = STORE ? esc(hostName()) : "介紹你來的顧問";
   const line = DEAL_LINES[Math.floor(Math.random()*DEAL_LINES.length)](n);
-  return `<div class="deal">
+  return `<div class="deal"><img class="art" src="img/deal.webp" alt="" loading="lazy" width="560" height="560"><div class="dtext">
     <span class="label">SPECIAL OFFER</span>
     <p class="dealh">${line}</p>
     <p class="note">不急著決定也完全沒關係，先把結果收著，想清楚了再找${n}聊聊就好。</p>
@@ -952,7 +972,7 @@ function deal(R){
       ${STORE&&STORE.l?`<a class="btn" href="${STORE.l.startsWith("@")?"https://line.me/R/ti/p/"+encodeURIComponent(STORE.l):"https://line.me/ti/p/~"+encodeURIComponent(STORE.l)}" target="_blank" rel="noopener">用 LINE 要優惠 ${ARROW}</a>`:""}
       <button class="${STORE&&STORE.l?"btn ghost":"btn"}" id="ask">複製「要優惠」訊息</button>
     </div>
-  </div>`;
+  </div></div>`;
 }
 function askText(){
   const r=window.quizResult, top=r?.recommendations?.[0]?.name||"推薦的產品";
