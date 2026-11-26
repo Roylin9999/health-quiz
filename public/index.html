@@ -408,7 +408,7 @@ const LINE_RE=/^@?[A-Za-z0-9._-]{2,30}$/, SLUG_RE=/^[A-Za-z0-9_-]{2,40}$/, UID_R
 const STORE = (()=>{ try{
   const q=new URLSearchParams(location.search), s=q.get("s")||"", u=q.get("u")||"", m=dec(q.get("m")||""), l=q.get("l")||"";
   if(!SLUG_RE.test(s)) return null;
-  return {s, u:UID_RE.test(u)?u:"", m:MAIL_RE.test(m)?m:"", l:LINE_RE.test(l)?l:""};
+  return {s:s.toLowerCase(), u:UID_RE.test(u)?u:"", m:MAIL_RE.test(m)?m:"", l:LINE_RE.test(l)?l:""};
 }catch(e){return null} })();
 const API_ON = /^https?:$/.test(location.protocol);
 async function api(path,opt={}){

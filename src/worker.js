@@ -17,7 +17,10 @@ const SCHEMA = [
      store TEXT COLLATE NOCASE, customer TEXT NOT NULL,
      focus TEXT, recommendations TEXT, answers TEXT,
      emailed INTEGER DEFAULT 0, created_at INTEGER NOT NULL)`,
-  `CREATE INDEX IF NOT EXISTS results_store ON results (store, created_at)`
+  `CREATE INDEX IF NOT EXISTS results_store ON results (store, created_at)`,
+  // 店舖名稱一律用小寫（官網網址是小寫，例如 dkstore），舊資料也順手轉成小寫
+  `UPDATE owners SET slug = lower(slug) WHERE slug <> lower(slug) COLLATE BINARY`,
+  `UPDATE results SET store = lower(store) WHERE store <> lower(store) COLLATE BINARY`
 ];
 let schemaReady = false;
 async function ensureSchema(db) {
@@ -122,7 +125,7 @@ async function api(request, env, url, ctx) {
   // 建立店主
   if (m === "POST" && p === "/api/owners") {
     const b = await readJson(request);
-    const slug = clip(b.slug, 40), credit = clip(b.credit_user, 20).toUpperCase(), email = clip(b.email, 120),
+    const slug = clip(b.slug, 40).toLowerCase(), credit = clip(b.credit_user, 20).toUpperCase(), email = clip(b.email, 120),
           line = clip(b.line, 31), pw = String(b.password || "");
     if (!SLUG_RE.test(slug)) return err(400, "店舖名稱格式不正確");
     if (credit && !UID_RE.test(credit)) return err(400, "會員編號格式不正確");
@@ -190,7 +193,7 @@ async function api(request, env, url, ctx) {
     const b = await readJson(request);
     const customer = clip(b.customer, 30);
     if (!customer) return err(400, "缺少姓名");
-    const store = SLUG_RE.test(String(b.store || "")) ? String(b.store) : null;
+    const store = SLUG_RE.test(String(b.store || "")) ? String(b.store).toLowerCase() : null;
     const owner = store ? await env.DB.prepare("SELECT * FROM owners WHERE slug = ?").bind(store).first() : null;
     const focus = Array.isArray(b.focus) ? b.focus.slice(0, 6).map(x => clip(x, 20)) : [];
     const recs = Array.isArray(b.recommendations) ? b.recommendations.slice(0, 3).map(r => ({
