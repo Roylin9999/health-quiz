@@ -96,13 +96,15 @@ async function syncToPlan(env, slug, r) {
 
 async function sendMail(to, data, origin) {
   const r = await fetch("https://formsubmit.co/ajax/" + encodeURIComponent(to), {
-    method: "POST",
+    method: "POST", signal: AbortSignal.timeout(8000),
     headers: { "content-type": "application/json", accept: "application/json", origin, referer: origin + "/" },
     body: JSON.stringify(data)
   });
   const j = await r.json().catch(() => ({}));
   return String(j.success) === "true";
 }
+// 伺服器寄信失敗時（FormSubmit 常擋掉伺服器發出的請求），把信件內容交給瀏覽器改從前端寄
+const mailJob = (to, data) => ({ to, data });
 
 function isAdmin(request, env) {
   const key = request.headers.get("x-admin-key") || "";
@@ -183,9 +185,16 @@ async function api(request, env, url, ctx) {
   if (m === "POST" && (mm = p.match(/^\/api\/owners\/([^/]+)\/test-mail$/))) {
     const o = await authOwner(request, env, decodeURIComponent(mm[1]));
     if (!o) return err(401, "請重新登入");
-    const ok = await sendMail(o.email, { _subject: `【健康選品｜${o.slug}】測試信`, _template: "table", _captcha: "false",
-      "店舖": o.slug, "說明": "這是測試信。收到這封信代表顧客的測驗結果可以正常寄到你的信箱。" }, url.origin);
-    return ok ? json({ ok: true }) : err(502, "寄信服務沒有回應成功");
+    const data = { _subject: `【健康選品｜${o.slug}】測試信`, _template: "table", _captcha: "false",
+      "店舖": o.slug, "說明": "這是測試信。收到這封信代表顧客的測驗結果可以正常寄到你的信箱。" };
+    const ok = await sendMail(o.email, data, url.origin).catch(() => false);
+    return json({ ok: true, sent: ok, mail: ok ? undefined : mailJob(o.email, data) });
+  }
+
+  // 前端代寄成功後回報，標記這筆已寄出
+  if (m === "POST" && (mm = p.match(/^\/api\/results\/(\d+)\/emailed$/))) {
+    await env.DB.prepare("UPDATE results SET emailed = 1 WHERE id = ? AND created_at > ?").bind(+mm[1], Date.now() - 36e5).run();
+    return json({ ok: true });
   }
 
   // 顧客：送出測驗結果
@@ -204,9 +213,9 @@ async function api(request, env, url, ctx) {
       "INSERT INTO results (store, customer, focus, recommendations, answers, created_at) VALUES (?, ?, ?, ?, ?, ?)"
     ).bind(owner ? owner.slug : store, customer, JSON.stringify(focus), JSON.stringify(recs), JSON.stringify(answers).slice(0, 8000), Date.now()).run();
     const id = ins.meta?.last_row_id;
-    let emailed = false;
+    let emailed = false, mailData = null;
     if (owner) {
-      const data = { _subject: `【健康選品｜${owner.slug}】${customer} 的測驗結果`, _template: "table", _captcha: "false",
+      const data = mailData = { _subject: `【健康選品｜${owner.slug}】${customer} 的測驗結果`, _template: "table", _captcha: "false",
         "店舖": owner.slug, "顧客姓名": customer,
         "測驗時間": new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei", hour12: false }),
         "保養重點": focus.join("、") };
@@ -216,7 +225,8 @@ async function api(request, env, url, ctx) {
       if (emailed && id) await env.DB.prepare("UPDATE results SET emailed = 1 WHERE id = ?").bind(id).run();
     }
     const synced = owner ? await syncToPlan(env, owner.slug, { id, customer, focus, recs, answers }).catch(() => false) : false;
-    return json({ ok: true, id, emailed, synced, store: owner ? owner.slug : null });
+    return json({ ok: true, id, emailed, synced, store: owner ? owner.slug : null,
+      mail: owner && !emailed ? mailJob(owner.email, mailData) : undefined });
   }
 
   // 管理者（Roy）：看全部店主與紀錄，需要密鑰 ADMIN_KEY

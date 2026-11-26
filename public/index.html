@@ -608,8 +608,12 @@ async function dashboard(sess, owner){
   document.getElementById("qb").onclick=()=>cloudHome();
   document.getElementById("lo").onclick=()=>{ dropSession(owner.slug); cloudHome(); };
   document.getElementById("tm").onclick=async()=>{ const st=document.getElementById("ts"); st.className="status"; st.textContent="傳送中…";
-    try{ await api(`/api/owners/${encodeURIComponent(owner.slug)}/test-mail`,{method:"POST",headers:authH(sess.token)}); st.className="status ok"; st.textContent="已送出。若是第一次使用，請到信箱點「Activate」啟用。"; }
-    catch(x){ st.textContent=x.code===401?"請重新登入":"寄信服務沒有回應，請稍後再試。"; } };
+    const done=()=>{ st.className="status ok"; st.textContent="已送出。若是第一次使用，請到信箱（也看一下垃圾郵件匣）點「Activate」啟用。"; };
+    try{ const j=await api(`/api/owners/${encodeURIComponent(owner.slug)}/test-mail`,{method:"POST",headers:authH(sess.token)});
+      if(j.sent) return done();
+      if(j.mail){ await sendMail(j.mail.to,j.mail.data); return done(); }   /* 伺服器寄不出去時，改從這台瀏覽器寄 */
+      throw {}; }
+    catch(x){ st.textContent=x.code===401?"請重新登入":("寄信沒有成功"+(x&&x.message?`：${x.message}`:"")+"。請確認 Email 拼字正確，或稍後再試。"); } };
   document.getElementById("ef").onsubmit=async e=>{ e.preventDefault(); const f=readOwnerFields(false); if(!f) return;
     const es=document.getElementById("es"); es.className="status"; es.textContent="儲存中…";
     try{ owner=(await api("/api/owners/"+encodeURIComponent(owner.slug),{method:"PUT",headers:authH(sess.token),body:JSON.stringify(f)})).owner; es.className="status ok"; es.textContent="已儲存"; document.getElementById("pw").value=""; }
@@ -773,10 +777,13 @@ function score(){
   }).filter(r=>r.s>0).sort((a,b)=>b.s-a.s);
   const picks=[], used={};
   const fam=t=>t.startsWith("s_")?"skin":t;
-  for(const r of ranked){ if(picks.length>=3) break; const f=fam(r.main); if(!used[f]){picks.push(r);used[f]=1;} }
+  /* 先照顧客選的目標順序，每個目標挑一款最符合的（第一個目標＝首選），再用其他需求補滿 */
+  (ans.goal||[]).forEach(k=>{ if(picks.length>=3) return; const g=fam(Q[1].opts[k].tag); if(used[g]) return;
+    const r=ranked.find(x=>!picks.includes(x)&&fam(x.main)===g); if(r){picks.push(r);used[g]=1;} });
+  for(const r of ranked){ if(picks.length>=3) break; const f=fam(r.main); if(!used[f]&&!picks.includes(r)){picks.push(r);used[f]=1;} }
   for(const r of ranked){ if(picks.length>=3) break; if(!picks.includes(r)) picks.push(r); }
   const rest = ranked.filter(r=>!picks.includes(r)).slice(0,4);
-  const max = picks[0]?.s || 1;
+  const max = Math.max(1e-9, ...picks.map(r=>r.s));
   const needs = Object.entries(need).filter(([t])=>!t.startsWith("s_")).sort((a,b)=>b[1]-a[1]).slice(0,4);
   return {need,why,picks,rest,max,needs,budget};
 }
@@ -794,7 +801,9 @@ function tile(r){
   const p=r.p;
   return `<a class="tile" href="${purl(p.h)}" target="_blank" rel="noopener" aria-label="到官網查看 ${esc(p.n)}" style="${tintStyle(r)}"><span class="tag">${esc(CAT[r.home]||"")}</span>${art(FORM[p.h],markOf(p.v))}${p.img?`<img src="${CDN}${p.img}?width=480" alt="${esc(p.n)}" loading="lazy" onerror="this.remove()">`:""}</a>`;
 }
-const pct = (r,R)=>Math.round(60+38*r.s/R.max);
+/* 符合度：依分數換算，並照推薦順序遞減（首選最高） */
+const pct = (r,R)=>{ if(!R._pct){ let prev=99; R._pct=new Map(R.picks.map(x=>{ const v=Math.min(prev, Math.round(60+38*x.s/R.max)); prev=v-2; return [x,v]; })); }
+  return R._pct.get(r) ?? Math.round(60+38*Math.min(1,r.s/R.max)); };
 
 function result(){
   const ts=performance.now();
@@ -862,7 +871,8 @@ function result(){
     visible().forEach(q=>{ const v=record.answers[q.id]; if(v) data["作答｜"+q.title]=Array.isArray(v)?v.join("、"):v; });
     return sendMail(STORE.m,data).then(okMsg,failMsg); };
     (API_ON?api("/api/results",{method:"POST",body:JSON.stringify({store:STORE.s,customer:custName,focus:record.focus,recommendations:record.recommendations,answers:qa})}):Promise.reject({code:"noapi"}))
-      .then(j=>{ if(j.store||!STORE.m) okMsg(); else legacy(); })
+      .then(j=>{ if(j.mail){ sendMail(j.mail.to,j.mail.data).then(()=>api(`/api/results/${j.id}/emailed`,{method:"POST"})).catch(()=>{}); }   /* 伺服器寄不出去時，改從顧客的瀏覽器代寄；紀錄已經存好 */
+        if(j.store||!STORE.m) okMsg(); else legacy(); })
       .catch(()=>{ if(STORE.m) legacy(); else failMsg(); });
   }
   window.scrollTo({top:0}); app.querySelector("h2").focus({preventScroll:true});
