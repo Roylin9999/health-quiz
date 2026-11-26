@@ -183,6 +183,17 @@ a.tile:hover svg,a.tile:hover img{transform:scale(1.04)}
 .deal{background:var(--gold-soft);border:1px solid var(--gold);padding:clamp(20px,4vw,36px);display:flex;flex-direction:column;gap:14px}
 .dealh{font:600 clamp(19px,3vw,24px)/1.6 var(--f-serif);letter-spacing:.02em}
 .dealh b{color:var(--moss);font-weight:700}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--hair);flex-wrap:wrap}
+.tab{appearance:none;background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;font:400 15px var(--f-sans);color:var(--muted);cursor:pointer;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--moss);font-weight:500}
+.rtable-wrap{overflow-x:auto;margin-top:8px}
+.rtable{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+.rtable th{text-align:left;font-weight:500;font-size:12px;letter-spacing:.12em;color:var(--muted);padding:8px 10px 8px 0;border-bottom:1px solid var(--hair)}
+.rtable td{padding:10px 10px 10px 0;border-bottom:1px solid var(--hair);vertical-align:top}
+.rtable td.num{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--muted)}
+.rtable a{color:var(--moss)}
+details.edit{border-top:1px solid var(--hair);padding-top:14px}
+details.edit summary{cursor:pointer;font:600 17px var(--f-serif)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);
   padding:12px 22px;font-size:14px;letter-spacing:.06em;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
@@ -394,6 +405,15 @@ const STORE = (()=>{ try{
   if(!SLUG_RE.test(s)) return null;
   return {s, u:UID_RE.test(u)?u:"", m:MAIL_RE.test(m)?m:"", l:LINE_RE.test(l)?l:""};
 }catch(e){return null} })();
+const API_ON = /^https?:$/.test(location.protocol);
+async function api(path,opt={}){
+  let r; try{ r=await fetch(path,{...opt,headers:{"content-type":"application/json",...(opt.headers||{})}}); }catch(e){ throw {code:"noapi"}; }
+  let j=null; try{ j=await r.json(); }catch(e){}
+  if(!j) throw {code:"noapi"};
+  if(!r.ok||!j.ok) throw {code:r.status,msg:j.error};
+  return j;
+}
+if(STORE && API_ON){ api("/api/store/"+encodeURIComponent(STORE.s)).then(j=>{ STORE.u=j.store.credit_user||STORE.u; STORE.l=j.store.line||STORE.l; }).catch(()=>{}); }
 const purl = h => STORE ? `https://www.markettaiwan.com.tw/${STORE.s}/products/${h}${STORE.u?`?credit_user=${STORE.u}`:""}` : SHOP+h;
 function loadOwner(){ try{return JSON.parse(localStorage.getItem("hq:owner")||"{}")}catch(e){return {}} }
 function saveOwner(o){ try{localStorage.setItem("hq:owner",JSON.stringify(o))}catch(e){} }
@@ -456,7 +476,151 @@ function owners(){ try{
 function saveOwners(l){ try{localStorage.setItem("hq:owners",JSON.stringify(l))}catch(e){} }
 const linkFor = o => location.origin+location.pathname+"?"+new URLSearchParams({s:o.s,...(o.u?{u:o.u}:{}),...(o.m?{m:enc(o.m)}:{}),...(o.l?{l:o.l}:{})}).toString();
 
-function setup(editIx){
+/* ---------- cloud mode: owners & results stored in the site's database ---------- */
+function sessions(){ try{ const l=JSON.parse(localStorage.getItem("hq:sessions")||"[]"); return Array.isArray(l)?l.filter(x=>x&&SLUG_RE.test(x.slug)&&x.token):[] }catch(e){return []} }
+function saveSessions(l){ try{localStorage.setItem("hq:sessions",JSON.stringify(l))}catch(e){} }
+function putSession(slug,token){ const l=sessions().filter(x=>x.slug.toLowerCase()!==slug.toLowerCase()); l.unshift({slug,token}); saveSessions(l); }
+function dropSession(slug){ saveSessions(sessions().filter(x=>x.slug.toLowerCase()!==slug.toLowerCase())); }
+const authH = t=>({authorization:"Bearer "+t});
+const storeLink = slug => location.origin+location.pathname+"?"+new URLSearchParams({s:slug}).toString();
+const fmtTime = ms => new Date(ms).toLocaleString("zh-TW",{hour12:false,month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});
+
+async function setup(){
+  i=-1; setTimer("店主專區");
+  app.innerHTML=`<section class="setup"><p class="hint">載入中…</p></section>`;
+  let mode="local";
+  if(API_ON){ try{ await api("/api/store/__probe__"); mode="cloud"; }catch(e){ if(e.code===404) mode="cloud"; } }
+  if(mode!=="cloud") return setupLocal();
+  cloudHome();
+}
+
+function ownerFields(o={}, create){
+  return `${create?`<div class="field"><label for="slug">店舖網址</label>
+      <div class="prefix"><span>markettaiwan.com.tw/</span><input id="slug" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="dkstore"></div>
+      <span class="err" id="e-slug"></span></div>`:""}
+    <div class="field"><label for="uid">會員編號（選填，連結中 credit_user= 後面那段）</label>
+      <input id="uid" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${esc(o.credit_user||"")}" placeholder="C1234567"><span class="err" id="e-uid"></span></div>
+    <div class="field"><label for="mail">接收測驗結果的 Email</label>
+      <input id="mail" type="email" autocomplete="email" value="${esc(o.email||"")}" placeholder="name@example.com"><span class="err" id="e-mail"></span></div>
+    <div class="field"><label for="line">LINE ID（選填，顧客可以直接用 LINE 找你要優惠）</label>
+      <input id="line" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(o.line||"")}" placeholder="例如 dkstore 或 @dkstore"><span class="err" id="e-line"></span></div>
+    <div class="field"><label for="pw">${create?"設定登入密碼（至少 6 個字）":"新密碼（不改請留空）"}</label>
+      <input id="pw" type="password" autocomplete="new-password"><span class="err" id="e-pw"></span></div>`;
+}
+function readOwnerFields(create){
+  const v=id=>(document.getElementById(id)?.value||"").trim();
+  const f={credit_user:v("uid").toUpperCase(), email:v("mail"), line:v("line").replace(/^https?:\/\/line\.me\/(R\/)?ti\/p\/~?/,""), password:document.getElementById("pw").value};
+  if(create) f.slug=v("slug").replace(/^.*markettaiwan\.com\.tw\//,"").replace(/[/?#].*$/,"");
+  const e={uid:!f.credit_user||UID_RE.test(f.credit_user)?"":"會員編號只能是英文和數字", mail:MAIL_RE.test(f.email)?"":"請填寫正確的 Email",
+    line:!f.line||LINE_RE.test(f.line)?"":"LINE ID 只能是英文、數字、. _ - 或 @", pw:(create||f.password)&&f.password.length<6?"密碼至少 6 個字":""};
+  if(create) e.slug=SLUG_RE.test(f.slug)?"":"請填寫英文、數字、- 或 _ 組成的店舖名稱";
+  for(const k in e){ const el=document.getElementById("e-"+k); if(el) el.textContent=e[k]; }
+  return Object.values(e).some(Boolean)?null:f;
+}
+
+function cloudHome(view, prefill){
+  i=-1; setTimer("店主專區");
+  const list=sessions();
+  const tab = view || (list.length?"list":"login");
+  app.innerHTML = `<section class="setup fade">
+    <span class="label">FOR STORE OWNERS</span>
+    <h2 tabindex="-1">店主專區</h2>
+    <p class="hint">登入後可以顯示專屬 QR Code、查看顧客的測驗紀錄。資料存在網站的資料庫，換手機或電腦登入就能看到。</p>
+    <div class="tabs" role="tablist">
+      ${list.length?`<button class="tab" data-t="list" aria-selected="${tab==="list"}">這台裝置的店主</button>`:""}
+      <button class="tab" data-t="login" aria-selected="${tab==="login"}">登入</button>
+      <button class="tab" data-t="create" aria-selected="${tab==="create"}">建立新店主</button>
+    </div>
+    <div id="tabbody"></div>
+    <div><button class="back" id="sb">← 回首頁</button></div>
+  </section>`;
+  app.querySelectorAll(".tab").forEach(b=>b.onclick=()=>cloudHome(b.dataset.t));
+  document.getElementById("sb").onclick=intro;
+  const body=document.getElementById("tabbody");
+  if(tab==="list"){
+    body.innerHTML=`<div class="olist">${list.map((x,ix)=>`<div class="orow">
+      <button class="opick" data-ix="${ix}"><span class="oname">${esc(x.slug)}</span><span class="omail">已登入</span></button>
+      <div class="oact"><button class="btn" data-ix="${ix}">開啟</button><button class="textlink" data-rm="${ix}">從這台裝置移除</button></div></div>`).join("")}</div>`;
+    body.querySelectorAll("[data-ix]").forEach(b=>b.onclick=()=>dashboard(list[+b.dataset.ix]));
+    body.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{ dropSession(list[+b.dataset.rm].slug); cloudHome(); });
+  } else if(tab==="login"){
+    body.innerHTML=`<form id="lf" class="sform" novalidate>
+      <div class="field"><label for="lslug">店舖網址</label><div class="prefix"><span>markettaiwan.com.tw/</span>
+        <input id="lslug" autocomplete="username" autocapitalize="off" spellcheck="false" value="${esc(prefill||"")}" placeholder="dkstore"></div></div>
+      <div class="field"><label for="lpw">密碼</label><input id="lpw" type="password" autocomplete="current-password"></div>
+      <span class="err" id="e-login"></span>
+      <div class="actions"><button class="btn" type="submit">登入 ${ARROW}</button></div></form>`;
+    document.getElementById("lf").onsubmit=async e=>{
+      e.preventDefault(); const er=document.getElementById("e-login"); er.textContent="";
+      const slug=document.getElementById("lslug").value.trim().replace(/^.*markettaiwan\.com\.tw\//,"").replace(/[/?#].*$/,"");
+      try{ const j=await api("/api/owners/login",{method:"POST",body:JSON.stringify({slug,password:document.getElementById("lpw").value})});
+        putSession(j.owner.slug,j.token); dashboard({slug:j.owner.slug,token:j.token},j.owner);
+      }catch(x){ er.textContent=x.msg||"登入失敗，請稍後再試"; }
+    };
+  } else {
+    body.innerHTML=`<form id="cf" class="sform" novalidate>${ownerFields({},true)}<span class="err" id="e-create"></span>
+      <div class="actions"><button class="btn" type="submit">建立並產生 QR Code ${ARROW}</button></div></form>`;
+    document.getElementById("cf").onsubmit=async e=>{
+      e.preventDefault(); const f=readOwnerFields(true); if(!f) return;
+      const er=document.getElementById("e-create"); er.textContent="";
+      try{ const j=await api("/api/owners",{method:"POST",body:JSON.stringify(f)});
+        putSession(j.owner.slug,j.token); dashboard({slug:j.owner.slug,token:j.token},j.owner);
+      }catch(x){ er.textContent=x.msg||"建立失敗，請稍後再試"; }
+    };
+  }
+  app.querySelector("h2").focus({preventScroll:true});
+}
+
+async function dashboard(sess, owner){
+  i=-1; setTimer("店主專區");
+  if(!owner){
+    app.innerHTML=`<section class="setup"><p class="hint">載入中…</p></section>`;
+    try{ owner=(await api("/api/owners/"+encodeURIComponent(sess.slug),{headers:authH(sess.token)})).owner; }
+    catch(x){ if(x.code===401){ dropSession(sess.slug); toast("登入已過期，請重新登入"); return cloudHome("login",sess.slug);} app.innerHTML=`<section class="setup"><p class="hint">讀取失敗，請稍後再試。</p><div><button class="back" id="sb">← 返回</button></div></section>`; document.getElementById("sb").onclick=()=>cloudHome(); return; }
+  }
+  const link=storeLink(owner.slug);
+  let svg=""; try{ if(window.qrcode){ const q=qrcode(0,"M"); q.addData(link); q.make(); svg=q.createSvgTag({cellSize:8,margin:2,scalable:true}); } }catch(e){}
+  app.innerHTML=`<section class="setup fade">
+    <span class="label">STORE · ${esc(owner.slug)}</span>
+    <h2 tabindex="-1">${esc(owner.slug)} 的店主專區</h2>
+    <div class="qrv" style="padding:0">
+      <div class="qrbox">${svg||`<p class="note">QR Code 載入失敗，請重新整理，或直接複製下方連結。</p>`}</div>
+      <p class="note">請顧客用手機相機掃描，就能在自己的手機上作答。</p>
+    </div>
+    <div class="out"><code id="lk"></code>
+      <div class="actions"><button class="btn" id="cl">複製連結</button><a class="link" id="ol" target="_blank" rel="noopener">開啟問卷 ${ARROW}</a></div>
+      <p class="note">第一次使用請先寄一封測試信，再到 ${esc(owner.email)} 點確認信裡的「Activate」，之後顧客的結果才會寄到信箱。沒有收到信也沒關係，所有紀錄都會存在下面。</p>
+      <div class="actions"><button class="btn ghost" id="tm">寄送測試信</button><span class="status" id="ts"></span></div>
+    </div>
+    <div class="olist"><h3>顧客測驗紀錄</h3><div id="rlist"><p class="hint" style="padding-top:12px">載入中…</p></div></div>
+    <details class="edit"><summary>修改店主資料</summary>
+      <form id="ef" class="sform" novalidate style="padding-top:14px">${ownerFields(owner,false)}<span class="err" id="e-edit"></span>
+      <div class="actions"><button class="btn" type="submit">儲存</button><span class="status" id="es"></span></div></form></details>
+    <div class="actions"><button class="back" id="qb">← 店主專區</button><button class="textlink" id="lo">登出這台裝置</button></div>
+  </section>`;
+  document.getElementById("lk").textContent=link; document.getElementById("ol").href=link;
+  document.getElementById("cl").onclick=()=>copyText(link,"已複製連結");
+  document.getElementById("qb").onclick=()=>cloudHome();
+  document.getElementById("lo").onclick=()=>{ dropSession(owner.slug); cloudHome(); };
+  document.getElementById("tm").onclick=async()=>{ const st=document.getElementById("ts"); st.className="status"; st.textContent="傳送中…";
+    try{ await api(`/api/owners/${encodeURIComponent(owner.slug)}/test-mail`,{method:"POST",headers:authH(sess.token)}); st.className="status ok"; st.textContent="已送出。若是第一次使用，請到信箱點「Activate」啟用。"; }
+    catch(x){ st.textContent=x.code===401?"請重新登入":"寄信服務沒有回應，請稍後再試。"; } };
+  document.getElementById("ef").onsubmit=async e=>{ e.preventDefault(); const f=readOwnerFields(false); if(!f) return;
+    const es=document.getElementById("es"); es.className="status"; es.textContent="儲存中…";
+    try{ owner=(await api("/api/owners/"+encodeURIComponent(owner.slug),{method:"PUT",headers:authH(sess.token),body:JSON.stringify(f)})).owner; es.className="status ok"; es.textContent="已儲存"; document.getElementById("pw").value=""; }
+    catch(x){ es.textContent=x.msg||"儲存失敗"; } };
+  try{
+    const {results}=await api(`/api/owners/${encodeURIComponent(owner.slug)}/results`,{headers:authH(sess.token)});
+    const box=document.getElementById("rlist");
+    if(!results.length){ box.innerHTML=`<p class="hint" style="padding-top:12px">還沒有顧客做測驗。把 QR Code 給顧客掃描後，紀錄會出現在這裡。</p>`; }
+    else box.innerHTML=`<p class="note" style="padding-top:10px">共 ${results.length} 筆</p><div class="rtable-wrap"><table class="rtable"><thead><tr><th>時間</th><th>顧客</th><th>保養重點</th><th>首選推薦</th></tr></thead><tbody>${
+      results.map(r=>{ let f=[],rc=[]; try{f=JSON.parse(r.focus||"[]");rc=JSON.parse(r.recommendations||"[]")}catch(e){}
+        return `<tr><td class="num">${fmtTime(r.created_at)}</td><td>${esc(r.customer)}</td><td>${esc(f.slice(0,2).join("、"))}</td><td>${rc[0]?(/^https:\/\//.test(rc[0].url)?`<a href="${esc(rc[0].url)}" target="_blank" rel="noopener">${esc(rc[0].name)}</a>`:esc(rc[0].name)):""}</td></tr>`;}).join("")}</tbody></table></div>`;
+  }catch(x){ document.getElementById("rlist").innerHTML=`<p class="hint" style="padding-top:12px">紀錄讀取失敗，請重新整理。</p>`; }
+  window.scrollTo({top:0}); app.querySelector("h2").focus({preventScroll:true});
+}
+
+function setupLocal(editIx){
   i=-1; setTimer("店主專區");
   const list=owners(), editing = Number.isInteger(editIx) ? list[editIx] : null, o = editing||{};
   app.innerHTML = `<section class="setup fade">
@@ -484,11 +648,11 @@ function setup(editIx){
     </form>
     <p class="note">店主紀錄存在這台裝置的瀏覽器裡。換手機或電腦使用時，需要再新增一次。</p>
   </section>`;
-  document.getElementById("sb").onclick=()=> editing?setup():intro();
+  document.getElementById("sb").onclick=()=> editing?setupLocal():intro();
   app.querySelectorAll("[data-qr],.opick").forEach(b=>b.onclick=()=>qrView(list[+(b.dataset.qr??b.dataset.ix)]));
-  app.querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>setup(+b.dataset.ed));
+  app.querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>setupLocal(+b.dataset.ed));
   app.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
-    if(b.dataset.armed){ list.splice(+b.dataset.del,1); saveOwners(list); setup(); toast("已刪除"); return; }
+    if(b.dataset.armed){ list.splice(+b.dataset.del,1); saveOwners(list); setupLocal(); toast("已刪除"); return; }
     b.dataset.armed="1"; b.textContent="確定刪除？"; b.style.color="#B2453A";
     setTimeout(()=>{ if(b.isConnected){ delete b.dataset.armed; b.textContent="刪除"; b.style.color=""; } },4000);
   });
@@ -530,7 +694,7 @@ function qrView(o){
   </section>`;
   document.getElementById("lk").textContent=link; document.getElementById("ol").href=link;
   document.getElementById("cl").onclick=()=>copyText(link,"已複製連結");
-  document.getElementById("qb").onclick=()=>setup();
+  document.getElementById("qb").onclick=()=>setupLocal();
   const tm=document.getElementById("tm");
   if(tm) tm.onclick=()=>{
     const st=document.getElementById("ts"); st.className="status"; st.textContent="傳送中…";
@@ -678,7 +842,7 @@ function result(){
       </div>
       <div class="sync" style="justify-content:space-between">
         <span class="label">SHARE</span>
-        <p class="note">${STORE?.m?`<span class="status" id="ms">正在把結果傳送給你的顧問 ${esc(STORE.s)}…</span>`:"把結果複製下來，傳給你的健康顧問或朋友。"}</p>
+        <p class="note">${STORE?`<span class="status" id="ms">正在把結果傳送給你的顧問 ${esc(STORE.s)}…</span>`:"把結果複製下來，傳給你的健康顧問或朋友。"}</p>
         <div class="actions"><button class="btn" id="copy">複製我的結果</button><button class="back" id="again">重新測驗</button></div>
       </div>
     </div>
@@ -686,15 +850,21 @@ function result(){
   document.getElementById("again").onclick=intro;
   document.getElementById("copy").onclick=()=>copy(record);
   document.getElementById("ask").onclick=()=>copyText(askText(),"已複製，貼給你的顧問就可以了");
-  if(STORE?.m && !record._sent){
+  if(STORE && !record._sent){
     const ms=document.getElementById("ms");
+    const okMsg=()=>{ms.className="status ok";ms.textContent=`已把結果傳送給你的顧問 ${STORE.s}，顧問會再跟你聯絡。`};
+    const failMsg=()=>{ms.textContent="結果沒有傳送成功。請按「複製我的結果」，再傳給你的顧問。"};
+    const qa={}; visible().forEach(q=>{ const v=record.answers[q.id]; if(v&&(!Array.isArray(v)||v.length)) qa[q.title]=v; });
+    record._sent=true;
+    const legacy=()=>{
     const data={_subject:`【健康選品｜${STORE.s}】${custName} 的測驗結果`,_template:"table",_captcha:"false",
       "店舖":STORE.s,"顧客姓名":custName,"測驗時間":new Date().toLocaleString("zh-TW",{hour12:false}),"保養重點":record.focus.join("、")};
     record.recommendations.forEach((r,ix)=>data[`推薦 ${ix+1}`]=`${r.name}（符合 ${r.match}%） ${r.url}`);
     visible().forEach(q=>{ const v=record.answers[q.id]; if(v) data["作答｜"+q.title]=Array.isArray(v)?v.join("、"):v; });
-    record._sent=true;
-    sendMail(STORE.m,data).then(()=>{ms.className="status ok";ms.textContent=`已把結果傳送給你的顧問 ${STORE.s}，顧問會再跟你聯絡。`})
-      .catch(()=>{ms.textContent="結果沒有傳送成功。請按「複製我的結果」，再傳給你的顧問。"});
+    return sendMail(STORE.m,data).then(okMsg,failMsg); };
+    (API_ON?api("/api/results",{method:"POST",body:JSON.stringify({store:STORE.s,customer:custName,focus:record.focus,recommendations:record.recommendations,answers:qa})}):Promise.reject({code:"noapi"}))
+      .then(j=>{ if(j.store||!STORE.m) okMsg(); else legacy(); })
+      .catch(()=>{ if(STORE.m) legacy(); else failMsg(); });
   }
   window.scrollTo({top:0}); app.querySelector("h2").focus({preventScroll:true});
 }

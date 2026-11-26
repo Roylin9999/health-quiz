@@ -1,5 +1,8 @@
 {
   "name": "health-quiz",
+  "main": "src/worker.js",
   "compatibility_date": "2025-09-01",
-  "assets": { "directory": "./public" }
+  "assets": { "directory": "./public", "binding": "ASSETS" }
+  // 資料庫：建立好 D1 之後，在上面那行後面加上逗號，並貼上：
+  // "d1_databases": [ { "binding": "DB", "database_name": "health-quiz-db", "database_id": "你的 D1 ID" } ]
 }

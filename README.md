@@ -1,15 +1,31 @@
 # 60 秒健康選品 — 部署說明
 
-純靜態網站（一個 `public/index.html`），用 Cloudflare Workers 的靜態資產功能發布。
+架構：一個 Cloudflare Worker（網頁＋API）＋ D1 資料庫（店主資料、顧客測驗紀錄）。
 
-## 第一次設定（只要做一次）
-1. Cloudflare 後台 → Workers 和 Pages → 建立 → 連接 GitHub，選這個 repo（health-quiz）。
+```
+public/index.html   網頁本體（問卷、結果頁、店主專區）
+src/worker.js       後端 API；第一次使用時會自動建立資料表
+wrangler.jsonc      Worker 設定（D1 繫結）
+```
+
+## 一、建立 Worker 專案（只要一次）
+1. Cloudflare 後台 → Workers 和 Pages → 建立 → 連接 GitHub，選 `health-quiz`。
 2. 建置命令留空，部署命令維持 `npx wrangler deploy`，按 Deploy。
-3. 完成後網址會是 `https://health-quiz.<你的帳號>.workers.dev`。
+
+## 二、建立 D1 資料庫（只要一次）
+1. Cloudflare 後台 → 儲存和資料庫 → D1 → 建立資料庫，名稱 `health-quiz-db`。
+2. 複製資料庫 ID，填進 `wrangler.jsonc` 的 `d1_databases`（或把 ID 交給 Claude 處理）。
+3. 資料表不用手動建立，網站第一次被使用時會自動建立。
+
+## 三、管理密鑰（選填）
+進 Worker 專案 → 設定 → 變數和密鑰，新增**密鑰（Secret）** `ADMIN_KEY`（自己訂一串密碼）。
+之後可用 `/api/admin/results`（標頭 `x-admin-key`）查看所有店主與紀錄。
 
 ## 之後怎麼更新
-改完 `public/index.html` 推上 GitHub，Cloudflare 會自動重新部署，約 1 分鐘生效。
+改完推上 GitHub，Cloudflare 會自動重新部署，約 1 分鐘生效。
 
-## 店主使用
-- 店主專區：網址後面加 `/#owner`，或首頁最下方「店主專區」。
-- 第一次使用請在店主專區按「寄送測試信」，到信箱點 Activate 啟用（寄信服務：FormSubmit）。
+## 資料與權限
+- 店主密碼以 PBKDF2 雜湊儲存，不存明碼。
+- 顧客端只拿得到店舖的公開資訊（店舖名稱、會員編號、LINE ID），拿不到店主 Email。
+- 每位店主登入後只看得到自己顧客的紀錄。
+- 寄信服務：FormSubmit。第一次使用請在店主專區按「寄送測試信」，到信箱點 Activate。
