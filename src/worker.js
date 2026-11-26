@@ -229,6 +229,21 @@ async function api(request, env, url, ctx) {
       mail: owner && !emailed ? mailJob(owner.email, mailData) : undefined });
   }
 
+  // 挑戰計劃網站（蘇打餅）讀取同步店舖的完整問卷紀錄，用收件鑰匙 INBOX_KEY；只讀，不能改
+  if (m === "GET" && p === "/api/sync/results") {
+    const key = request.headers.get("x-inbox-key") || "";
+    if (!env.INBOX_KEY || !safeEqual(key, env.INBOX_KEY)) return err(401, "收件鑰匙不正確");
+    const stores = String(env.SYNC_STORE || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
+    const store = String(url.searchParams.get("store") || stores[0] || "").toLowerCase();
+    if (!stores.includes(store)) return err(403, "這個店舖沒有開放同步");
+    const { results } = await env.DB.prepare(
+      "SELECT id, customer, focus, recommendations, answers, created_at FROM results WHERE store = ? ORDER BY created_at DESC LIMIT 300"
+    ).bind(store).all();
+    const parse = (s, d) => { try { return JSON.parse(s || "") ?? d; } catch (e) { return d; } };
+    return json({ ok: true, store, results: results.map(r => ({ id: `hq-${store}-${r.id}`, name: r.customer, at: r.created_at,
+      focus: parse(r.focus, []), recs: parse(r.recommendations, []), answers: parse(r.answers, {}) })) });
+  }
+
   // 管理者（Roy）：看全部店主與紀錄，需要密鑰 ADMIN_KEY
   if (m === "GET" && p === "/api/admin/results") {
     if (!isAdmin(request, env)) return err(401, "管理密鑰不正確");
