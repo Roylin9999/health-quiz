@@ -418,7 +418,8 @@ async function api(path,opt={}){
   if(!r.ok||!j.ok) throw {code:r.status,msg:j.error};
   return j;
 }
-if(STORE && API_ON){ api("/api/store/"+encodeURIComponent(STORE.s)).then(j=>{ STORE.u=j.store.credit_user||STORE.u; STORE.l=j.store.line||STORE.l; }).catch(()=>{}); }
+if(STORE && API_ON){ api("/api/store/"+encodeURIComponent(STORE.s)).then(j=>{ STORE.u=j.store.credit_user||STORE.u; STORE.l=j.store.line||STORE.l; if(j.store.name){ STORE.n=j.store.name; document.querySelectorAll(".hostname").forEach(e=>e.textContent=STORE.n); } }).catch(()=>{}); }
+const hostName = ()=> STORE ? (STORE.n || STORE.s) : "";   /* 顧客看到的店主稱呼；沒填就用店舖名稱 */
 const purl = h => STORE ? `https://www.markettaiwan.com.tw/${STORE.s}/products/${h}${STORE.u?`?credit_user=${STORE.u}`:""}` : SHOP+h;
 function loadOwner(){ try{return JSON.parse(localStorage.getItem("hq:owner")||"{}")}catch(e){return {}} }
 function saveOwner(o){ try{localStorage.setItem("hq:owner",JSON.stringify(o))}catch(e){} }
@@ -441,7 +442,7 @@ function intro(){
       <span class="label">PERSONAL WELLNESS CONSULTATION</span>
       <h1>九個問題，<br>找到你的日常保養</h1>
       <p class="lead">依照你的作息、飲食與想改善的地方，從官網保健、體態管理與保養產品中，挑出最適合你的三樣。最後一題作答完，結果立刻出現。</p>
-      ${STORE?`<p class="host">你的健康顧問：<b>${esc(STORE.s)}</b></p>
+      ${STORE?`<p class="host">你的健康顧問：<b class="hostname">${esc(hostName())}</b></p>
       <div class="field" style="max-width:360px"><label for="cname">你的姓名</label><input id="cname" autocomplete="name" maxlength="30" value="${esc(custName)}" placeholder="例如：王小明"><span class="err" id="cerr"></span></div>
       <p class="note" style="max-width:30em">作答完成後，你的姓名與測驗結果會傳送給這位顧問，方便為你說明推薦的產品。</p>`:""}
       <div><button class="btn" id="go">開始測驗 ${ARROW}</button></div>
@@ -503,6 +504,8 @@ function ownerFields(o={}, create){
   return `${create?`<div class="field"><label for="slug">店舖網址</label>
       <div class="prefix"><span>markettaiwan.com.tw/</span><input id="slug" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="dkstore"></div>
       <span class="err" id="e-slug"></span></div>`:""}
+    <div class="field"><label for="dname">顧客看到的稱呼（例如 Roy、宛真姐）</label>
+      <input id="dname" autocomplete="nickname" maxlength="20" value="${esc(o.name||"")}" placeholder="Roy"><span class="err" id="e-dname"></span></div>
     <div class="field"><label for="uid">會員編號（選填，連結中 credit_user= 後面那段）</label>
       <input id="uid" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${esc(o.credit_user||"")}" placeholder="C1234567"><span class="err" id="e-uid"></span></div>
     <div class="field"><label for="mail">接收測驗結果的 Email</label>
@@ -514,7 +517,7 @@ function ownerFields(o={}, create){
 }
 function readOwnerFields(create){
   const v=id=>(document.getElementById(id)?.value||"").trim();
-  const f={credit_user:v("uid").toUpperCase(), email:v("mail"), line:v("line").replace(/^https?:\/\/line\.me\/(R\/)?ti\/p\/~?/,""), password:document.getElementById("pw").value};
+  const f={name:v("dname"), credit_user:v("uid").toUpperCase(), email:v("mail"), line:v("line").replace(/^https?:\/\/line\.me\/(R\/)?ti\/p\/~?/,""), password:document.getElementById("pw").value};
   if(create) f.slug=v("slug").replace(/^.*markettaiwan\.com\.tw\//,"").replace(/[/?#].*$/,"");
   const e={uid:!f.credit_user||UID_RE.test(f.credit_user)?"":"會員編號只能是英文和數字", mail:MAIL_RE.test(f.email)?"":"請填寫正確的 Email",
     line:!f.line||LINE_RE.test(f.line)?"":"LINE ID 只能是英文、數字、. _ - 或 @", pw:(create||f.password)&&f.password.length<6?"密碼至少 6 個字":""};
@@ -657,7 +660,7 @@ async function admin(){
   const draw=()=>{
     app.innerHTML=`<section class="setup fade"><span class="label">ADMIN</span><h2 tabindex="-1">總後台</h2>
       <div class="olist"><h3>店主（${d.owners.length}）</h3><div class="rtable-wrap"><table class="rtable"><thead><tr><th>店舖</th><th>Email</th><th>會員編號</th><th>顧客數</th><th>建立</th><th></th></tr></thead><tbody>${
-        d.owners.map(o=>`<tr><td><button class="textlink" data-f="${esc(o.slug)}">${esc(o.slug)}</button></td><td>${esc(o.email)}</td><td>${esc(o.credit_user||"")}</td><td class="num">${cnt[o.slug.toLowerCase()]||0}</td><td class="num">${fmtTime(o.created_at)}</td><td><button class="textlink" data-do="${esc(o.slug)}">刪除</button></td></tr>`).join("")||`<tr><td colspan="6">還沒有店主</td></tr>`}</tbody></table></div></div>
+        d.owners.map(o=>`<tr><td><button class="textlink" data-f="${esc(o.slug)}">${esc(o.slug)}</button>${o.display_name?`<br><small>${esc(o.display_name)}</small>`:""}</td><td>${esc(o.email)}</td><td>${esc(o.credit_user||"")}</td><td class="num">${cnt[o.slug.toLowerCase()]||0}</td><td class="num">${fmtTime(o.created_at)}</td><td><button class="textlink" data-do="${esc(o.slug)}">刪除</button></td></tr>`).join("")||`<tr><td colspan="6">還沒有店主</td></tr>`}</tbody></table></div></div>
       <div class="olist"><h3>顧客測驗紀錄${filter?`・${esc(filter)}　<button class="textlink" data-f="">看全部</button>`:""}</h3><div class="rtable-wrap"><table class="rtable"><thead><tr><th>時間</th><th>店舖</th><th>顧客</th><th>保養重點</th><th>首選推薦</th><th></th></tr></thead><tbody>${rows()||`<tr><td colspan="6">沒有紀錄</td></tr>`}</tbody></table></div></div>
       <p class="note">刪除只會刪掉這個網站裡的資料。已經送進蘇打餅名單的顧客，要到蘇打餅的名單裡另外刪除。</p>
       <div class="actions"><button class="textlink" id="ax">登出總後台</button></div></section>`;
@@ -695,7 +698,9 @@ function setupLocal(editIx){
       <div class="field"><label for="slug">店舖網址</label>
         <div class="prefix"><span>markettaiwan.com.tw/</span><input id="slug" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(o.s||"")}" placeholder="dkstore"></div>
         <span class="err" id="e-slug"></span></div>
-      <div class="field"><label for="uid">會員編號（選填，連結中 credit_user= 後面那段）</label>
+      <div class="field"><label for="dname">顧客看到的稱呼（例如 Roy、宛真姐）</label>
+      <input id="dname" autocomplete="nickname" maxlength="20" value="${esc(o.name||"")}" placeholder="Roy"><span class="err" id="e-dname"></span></div>
+    <div class="field"><label for="uid">會員編號（選填，連結中 credit_user= 後面那段）</label>
         <input id="uid" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${esc(o.u||"")}" placeholder="C1234567"><span class="err" id="e-uid"></span></div>
       <div class="field"><label for="mail">接收測驗結果的 Email</label>
         <input id="mail" type="email" autocomplete="email" value="${esc(o.m||"")}" placeholder="name@example.com"><span class="err" id="e-mail"></span></div>
@@ -899,7 +904,7 @@ function result(){
     <div class="closing">
       <div class="sync" style="justify-content:space-between">
         <span class="label">SHARE</span>
-        <p class="note">${STORE?`<span class="status" id="ms">正在把結果傳送給你的顧問 ${esc(STORE.s)}…</span>`:"把結果複製下來，傳給你的健康顧問或朋友。"}</p>
+        <p class="note">${STORE?`<span class="status" id="ms">正在把結果傳送給你的顧問 ${esc(hostName())}…</span>`:"把結果複製下來，傳給你的健康顧問或朋友。"}</p>
         <div class="actions"><button class="btn" id="copy">複製我的結果</button><button class="back" id="again">重新測驗</button></div>
       </div>
     </div>
@@ -909,7 +914,7 @@ function result(){
   document.getElementById("ask").onclick=()=>copyText(askText(),"已複製，貼給你的顧問就可以了");
   if(STORE && !record._sent){
     const ms=document.getElementById("ms");
-    const okMsg=()=>{ms.className="status ok";ms.textContent=`已把結果傳送給你的顧問 ${STORE.s}，顧問會再跟你聯絡。`};
+    const okMsg=()=>{ms.className="status ok";ms.textContent=`已把結果傳送給你的顧問 ${hostName()}，顧問會再跟你聯絡。`};
     const failMsg=()=>{ms.textContent="結果沒有傳送成功。請按「複製我的結果」，再傳給你的顧問。"};
     const qa={}; visible().forEach(q=>{ const v=record.answers[q.id]; if(v&&(!Array.isArray(v)||v.length)) qa[q.title]=v; });
     record._sent=true;
@@ -933,7 +938,7 @@ const DEAL_LINES = [
   n=>`還在猶豫嗎？猶豫的時候最適合做一件事：<br>跟 <b>${n}</b> 討個優惠 🙌`
 ];
 function deal(R){
-  const n = STORE ? esc(STORE.s) : "介紹你來的顧問";
+  const n = STORE ? esc(hostName()) : "介紹你來的顧問";
   const line = DEAL_LINES[Math.floor(Math.random()*DEAL_LINES.length)](n);
   return `<div class="deal">
     <span class="label">SPECIAL OFFER</span>
@@ -947,7 +952,7 @@ function deal(R){
 }
 function askText(){
   const r=window.quizResult, top=r?.recommendations?.[0]?.name||"推薦的產品";
-  return `嗨${STORE?" "+STORE.s:""}～我是${custName||"剛做完健康測驗的朋友"}，剛做完健康測驗，系統推薦我「${top}」。聽說找你可以拿到優惠？拜託拜託 🙏`;
+  return `嗨${STORE?" "+hostName():""}～我是${custName||"剛做完健康測驗的朋友"}，剛做完健康測驗，系統推薦我「${top}」。聽說找你可以拿到優惠？拜託拜託 🙏`;
 }
 function copy(rec){
   const txt = `【健康選品 測驗結果】\n保養重點：${rec.focus.join("、")}\n` +

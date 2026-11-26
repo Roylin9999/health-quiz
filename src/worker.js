@@ -26,6 +26,8 @@ let schemaReady = false;
 async function ensureSchema(db) {
   if (schemaReady) return;
   await db.batch(SCHEMA.map(s => db.prepare(s)));
+  // 新欄位：顧客看到的稱呼（例如 Roy）；已經有這個欄位時會報錯，忽略即可
+  await db.prepare("ALTER TABLE owners ADD COLUMN display_name TEXT").run().catch(() => {});
   schemaReady = true;
 }
 
@@ -56,7 +58,7 @@ async function readJson(request, max = 20000) {
 }
 const clip = (v, n) => String(v ?? "").trim().slice(0, n);
 
-function ownerPublic(o) { return { slug: o.slug, credit_user: o.credit_user || "", line: o.line_id || "" }; }
+function ownerPublic(o) { return { slug: o.slug, credit_user: o.credit_user || "", line: o.line_id || "", name: o.display_name || "" }; }
 function ownerPrivate(o) { return { ...ownerPublic(o), email: o.email }; }
 
 async function authOwner(request, env, slug) {
@@ -128,7 +130,7 @@ async function api(request, env, url, ctx) {
   if (m === "POST" && p === "/api/owners") {
     const b = await readJson(request);
     const slug = clip(b.slug, 40).toLowerCase(), credit = clip(b.credit_user, 20).toUpperCase(), email = clip(b.email, 120),
-          line = clip(b.line, 31), pw = String(b.password || "");
+          line = clip(b.line, 31), name = clip(b.name, 20), pw = String(b.password || "");
     if (!SLUG_RE.test(slug)) return err(400, "店舖名稱格式不正確");
     if (credit && !UID_RE.test(credit)) return err(400, "會員編號格式不正確");
     if (!MAIL_RE.test(email)) return err(400, "Email 格式不正確");
@@ -137,8 +139,8 @@ async function api(request, env, url, ctx) {
     const exists = await env.DB.prepare("SELECT slug FROM owners WHERE slug = ?").bind(slug).first();
     if (exists) return err(409, "這個店舖已經建立過了，請直接登入");
     const salt = randHex(16), now = Date.now();
-    await env.DB.prepare(`INSERT INTO owners (slug, credit_user, email, line_id, pw_salt, pw_hash, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).bind(slug, credit || null, email, line || null, salt, await pbkdf2(pw, salt), now, now).run();
+    await env.DB.prepare(`INSERT INTO owners (slug, credit_user, email, line_id, display_name, pw_salt, pw_hash, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(slug, credit || null, email, line || null, name || null, salt, await pbkdf2(pw, salt), now, now).run();
     const o = await env.DB.prepare("SELECT * FROM owners WHERE slug = ?").bind(slug).first();
     return json({ ok: true, owner: ownerPrivate(o), token: await newToken(env, o.slug) });
   }
@@ -157,11 +159,11 @@ async function api(request, env, url, ctx) {
     if (!o) return err(401, "請重新登入");
     if (m === "GET") return json({ ok: true, owner: ownerPrivate(o) });
     const b = await readJson(request);
-    const credit = clip(b.credit_user, 20).toUpperCase(), email = clip(b.email, 120), line = clip(b.line, 31);
+    const credit = clip(b.credit_user, 20).toUpperCase(), email = clip(b.email, 120), line = clip(b.line, 31), name = clip(b.name, 20);
     if (credit && !UID_RE.test(credit)) return err(400, "會員編號格式不正確");
     if (!MAIL_RE.test(email)) return err(400, "Email 格式不正確");
     if (line && !LINE_RE.test(line)) return err(400, "LINE ID 格式不正確");
-    let sql = "UPDATE owners SET credit_user = ?, email = ?, line_id = ?, updated_at = ?", args = [credit || null, email, line || null, Date.now()];
+    let sql = "UPDATE owners SET credit_user = ?, email = ?, line_id = ?, display_name = ?, updated_at = ?", args = [credit || null, email, line || null, name || null, Date.now()];
     if (b.password) {
       if (String(b.password).length < 6) return err(400, "密碼至少 6 個字");
       const salt = randHex(16); sql += ", pw_salt = ?, pw_hash = ?"; args.push(salt, await pbkdf2(String(b.password), salt));
@@ -257,7 +259,7 @@ async function api(request, env, url, ctx) {
     if (!isAdmin(request, env)) return err(401, "管理密鑰不正確");
     const { results } = await env.DB.prepare(
       "SELECT id, store, customer, focus, recommendations, emailed, created_at FROM results ORDER BY created_at DESC LIMIT 1000").all();
-    const owners = (await env.DB.prepare("SELECT slug, credit_user, email, line_id, created_at FROM owners ORDER BY created_at").all()).results;
+    const owners = (await env.DB.prepare("SELECT slug, display_name, credit_user, email, line_id, created_at FROM owners ORDER BY created_at").all()).results;
     return json({ ok: true, owners, results });
   }
 
