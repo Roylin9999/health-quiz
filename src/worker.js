@@ -77,6 +77,17 @@ async function newToken(env, slug) {
 }
 
 // 把顧客結果送到店主的挑戰計劃網站（例如蘇打餅）的收件匣，在背後進行、顧客看不到
+// 讀取／刪除同步紀錄的鑰匙：
+//   SYNC_STORE 裡的店舖（Roy 的 dkstore）用 INBOX_KEY；
+//   其他店舖各自一把密鑰 SYNC_KEY_<店舖代碼大寫>，例：ygrekhuang → SYNC_KEY_YGREKHUANG（達爾文網站用）
+function syncKeyOk(env, store, key) {
+  if (!store) return err(400, "缺少店舖");
+  const stores = String(env.SYNC_STORE || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
+  const own = env["SYNC_KEY_" + store.toUpperCase().replace(/[^A-Z0-9]/g, "_")];
+  if (own && safeEqual(key, own)) return true;
+  if (stores.includes(store) && env.INBOX_KEY && safeEqual(key, env.INBOX_KEY)) return true;
+  return err(401, own || stores.includes(store) ? "收件鑰匙不正確" : "這個店舖沒有開放同步");
+}
 // 設定：wrangler.jsonc 的 vars（SYNC_STORE 店舖、SYNC_URL 網址）、services 的 PLAN ＋ 密鑰 INBOX_KEY（兩邊設成一樣）
 async function syncToPlan(env, slug, r) {
   if (!env.SYNC_URL || !env.INBOX_KEY) return false;
@@ -233,11 +244,10 @@ async function api(request, env, url, ctx) {
 
   // 挑戰計劃網站（蘇打餅）讀取同步店舖的完整問卷紀錄，用收件鑰匙 INBOX_KEY；只讀，不能改
   if (m === "GET" && p === "/api/sync/results") {
-    const key = request.headers.get("x-inbox-key") || "";
-    if (!env.INBOX_KEY || !safeEqual(key, env.INBOX_KEY)) return err(401, "收件鑰匙不正確");
     const stores = String(env.SYNC_STORE || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
     const store = String(url.searchParams.get("store") || stores[0] || "").toLowerCase();
-    if (!stores.includes(store)) return err(403, "這個店舖沒有開放同步");
+    const ok = syncKeyOk(env, store, request.headers.get("x-inbox-key") || "");
+    if (ok !== true) return ok;
     const { results } = await env.DB.prepare(
       "SELECT id, customer, focus, recommendations, answers, created_at FROM results WHERE store = ? ORDER BY created_at DESC LIMIT 300"
     ).bind(store).all();
@@ -256,11 +266,9 @@ async function api(request, env, url, ctx) {
 
   // 挑戰計劃網站刪除一筆問卷（測試資料等），同樣用收件鑰匙 INBOX_KEY，只能刪同步店舖的
   if (m === "DELETE" && (mm = p.match(/^\/api\/sync\/results\/hq-([A-Za-z0-9_-]+)-(\d+)$/))) {
-    const key = request.headers.get("x-inbox-key") || "";
-    if (!env.INBOX_KEY || !safeEqual(key, env.INBOX_KEY)) return err(401, "收件鑰匙不正確");
-    const stores = String(env.SYNC_STORE || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
     const store = mm[1].toLowerCase();
-    if (!stores.includes(store)) return err(403, "這個店舖沒有開放同步");
+    const ok = syncKeyOk(env, store, request.headers.get("x-inbox-key") || "");
+    if (ok !== true) return ok;
     const r = await env.DB.prepare("DELETE FROM results WHERE id = ? AND store = ?").bind(+mm[2], store).run();
     return json({ ok: true, deleted: r.meta?.changes || 0 });
   }
