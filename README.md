@@ -35,3 +35,11 @@ wrangler.jsonc      Worker 設定（D1 繫結）
 `wrangler.jsonc` 已經設定好：店舖 `dkstore` 的顧客結果，會在背後送到蘇打餅（`SYNC_STORE`、`SYNC_URL`，並用服務繫結 `PLAN` 連到 challenge-plan）。
 只要在兩個 Worker 都新增同一個密鑰 `INBOX_KEY`（設定 → 變數和密鑰 → 類型選「密鑰」）就會開始傳。
 沒設定 `INBOX_KEY` 時不會傳，其他功能照常。要讓更多店舖送過去，把 `SYNC_STORE` 改成用逗號隔開，例如 `dkstore,abcstore`。
+
+## 總後台
+
+1. Cloudflare → health-quiz → 設定 → 變數和密鑰 → 新增，類型選「密鑰」：名稱 `ADMIN_KEY`，內容自己訂一串長一點的密碼。
+2. 打開 `https://health-quiz.wellstoryhall.com/#admin`，輸入這組密鑰。
+3. 可以看到全部店主和顧客紀錄，可以刪除店主（可選擇連同顧客紀錄一起刪）或單筆顧客紀錄。
+
+店主自己在店主專區也能刪除自己的顧客紀錄。刪除不會影響已經送進蘇打餅名單的資料。

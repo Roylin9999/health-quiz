@@ -622,11 +622,60 @@ async function dashboard(sess, owner){
     const {results}=await api(`/api/owners/${encodeURIComponent(owner.slug)}/results`,{headers:authH(sess.token)});
     const box=document.getElementById("rlist");
     if(!results.length){ box.innerHTML=`<p class="hint" style="padding-top:12px">還沒有顧客做測驗。把 QR Code 給顧客掃描後，紀錄會出現在這裡。</p>`; }
-    else box.innerHTML=`<p class="note" style="padding-top:10px">共 ${results.length} 筆</p><div class="rtable-wrap"><table class="rtable"><thead><tr><th>時間</th><th>顧客</th><th>保養重點</th><th>首選推薦</th></tr></thead><tbody>${
+    else box.innerHTML=`<p class="note" style="padding-top:10px">共 ${results.length} 筆</p><div class="rtable-wrap"><table class="rtable"><thead><tr><th>時間</th><th>顧客</th><th>保養重點</th><th>首選推薦</th><th></th></tr></thead><tbody>${
       results.map(r=>{ let f=[],rc=[]; try{f=JSON.parse(r.focus||"[]");rc=JSON.parse(r.recommendations||"[]")}catch(e){}
-        return `<tr><td class="num">${fmtTime(r.created_at)}</td><td>${esc(r.customer)}</td><td>${esc(f.slice(0,2).join("、"))}</td><td>${rc[0]?(/^https:\/\//.test(rc[0].url)?`<a href="${esc(rc[0].url)}" target="_blank" rel="noopener">${esc(rc[0].name)}</a>`:esc(rc[0].name)):""}</td></tr>`;}).join("")}</tbody></table></div>`;
+        return `<tr><td class="num">${fmtTime(r.created_at)}</td><td>${esc(r.customer)}</td><td>${esc(f.slice(0,2).join("、"))}</td><td>${rc[0]?(/^https:\/\//.test(rc[0].url)?`<a href="${esc(rc[0].url)}" target="_blank" rel="noopener">${esc(rc[0].name)}</a>`:esc(rc[0].name)):""}</td><td><button class="textlink" data-del="${r.id}" data-name="${esc(r.customer)}">刪除</button></td></tr>`;}).join("")}</tbody></table></div>`;
+    box.onclick=async e=>{ const b=e.target.closest("[data-del]"); if(!b) return;
+      if(!confirm(`確定要刪除「${b.dataset.name}」這筆測驗紀錄嗎？刪除後無法復原。`)) return;
+      try{ await api(`/api/owners/${encodeURIComponent(owner.slug)}/results/${b.dataset.del}`,{method:"DELETE",headers:authH(sess.token)}); toast("已刪除"); dashboard(sess, owner); }
+      catch(x){ toast(x.msg||"刪除失敗"); } };
   }catch(x){ document.getElementById("rlist").innerHTML=`<p class="hint" style="padding-top:12px">紀錄讀取失敗，請重新整理。</p>`; }
   window.scrollTo({top:0}); app.querySelector("h2").focus({preventScroll:true});
+}
+
+/* ---------- 總後台（#admin）：只有知道 ADMIN_KEY 的人能用 ---------- */
+const adminKey=()=>{ try{return sessionStorage.getItem("hq:admin")||""}catch(e){return ""} };
+async function admin(){
+  i=-1; setTimer("總後台");
+  const key=adminKey();
+  if(!key){
+    app.innerHTML=`<section class="setup fade"><span class="label">ADMIN</span><h2 tabindex="-1">總後台</h2>
+      <form id="af" class="sform" novalidate><div class="field" style="max-width:420px"><label for="ak">管理密鑰（Cloudflare 裡設定的 ADMIN_KEY）</label><input id="ak" type="password" autocomplete="current-password"></div>
+      <span class="err" id="e-ak"></span><div class="actions"><button class="btn" type="submit">進入</button></div></form></section>`;
+    document.getElementById("af").onsubmit=e=>{ e.preventDefault(); try{sessionStorage.setItem("hq:admin",document.getElementById("ak").value.trim())}catch(_){} admin(); };
+    return;
+  }
+  app.innerHTML=`<section class="setup"><p class="hint">載入中…</p></section>`;
+  const H={"x-admin-key":key};
+  let d; try{ d=await api("/api/admin/results",{headers:H}); }
+  catch(x){ try{sessionStorage.removeItem("hq:admin")}catch(_){} if(x.code===401){ toast("管理密鑰不正確"); return admin(); }
+    app.innerHTML=`<section class="setup"><p class="hint">${x.code==="noapi"?"找不到後端，請在正式網址開啟。":esc(x.msg||"讀取失敗")}</p></section>`; return; }
+  const cnt={}; d.results.forEach(r=>{ const k=(r.store||"（無店舖）").toLowerCase(); cnt[k]=(cnt[k]||0)+1; });
+  let filter="";
+  const rows=()=>d.results.filter(r=>!filter||(r.store||"").toLowerCase()===filter).map(r=>{ let f=[],rc=[]; try{f=JSON.parse(r.focus||"[]");rc=JSON.parse(r.recommendations||"[]")}catch(e){}
+    return `<tr><td class="num">${fmtTime(r.created_at)}</td><td>${esc(r.store||"")}</td><td>${esc(r.customer)}</td><td>${esc(f.slice(0,2).join("、"))}</td><td>${esc(rc[0]?.name||"")}</td><td><button class="textlink" data-dr="${r.id}" data-name="${esc(r.customer)}">刪除</button></td></tr>`; }).join("");
+  const draw=()=>{
+    app.innerHTML=`<section class="setup fade"><span class="label">ADMIN</span><h2 tabindex="-1">總後台</h2>
+      <div class="olist"><h3>店主（${d.owners.length}）</h3><div class="rtable-wrap"><table class="rtable"><thead><tr><th>店舖</th><th>Email</th><th>會員編號</th><th>顧客數</th><th>建立</th><th></th></tr></thead><tbody>${
+        d.owners.map(o=>`<tr><td><button class="textlink" data-f="${esc(o.slug)}">${esc(o.slug)}</button></td><td>${esc(o.email)}</td><td>${esc(o.credit_user||"")}</td><td class="num">${cnt[o.slug.toLowerCase()]||0}</td><td class="num">${fmtTime(o.created_at)}</td><td><button class="textlink" data-do="${esc(o.slug)}">刪除</button></td></tr>`).join("")||`<tr><td colspan="6">還沒有店主</td></tr>`}</tbody></table></div></div>
+      <div class="olist"><h3>顧客測驗紀錄${filter?`・${esc(filter)}　<button class="textlink" data-f="">看全部</button>`:""}</h3><div class="rtable-wrap"><table class="rtable"><thead><tr><th>時間</th><th>店舖</th><th>顧客</th><th>保養重點</th><th>首選推薦</th><th></th></tr></thead><tbody>${rows()||`<tr><td colspan="6">沒有紀錄</td></tr>`}</tbody></table></div></div>
+      <p class="note">刪除只會刪掉這個網站裡的資料。已經送進蘇打餅名單的顧客，要到蘇打餅的名單裡另外刪除。</p>
+      <div class="actions"><button class="textlink" id="ax">登出總後台</button></div></section>`;
+    app.querySelector("section").onclick=handler;
+  };
+  const handler=async e=>{
+    const t=e.target;
+    if(t.id==="ax"){ try{sessionStorage.removeItem("hq:admin")}catch(_){} return admin(); }
+    if(t.dataset.f!==undefined){ filter=t.dataset.f.toLowerCase(); return draw(); }
+    if(t.dataset.dr){ if(!confirm(`確定要刪除「${t.dataset.name}」這筆測驗紀錄嗎？刪除後無法復原。`)) return;
+      try{ await api(`/api/admin/results/${t.dataset.dr}`,{method:"DELETE",headers:H}); d.results=d.results.filter(r=>String(r.id)!==t.dataset.dr); toast("已刪除");
+        Object.keys(cnt).forEach(k=>delete cnt[k]); d.results.forEach(r=>{ const k=(r.store||"（無店舖）").toLowerCase(); cnt[k]=(cnt[k]||0)+1; }); draw(); }catch(x){ toast(x.msg||"刪除失敗"); } return; }
+    if(t.dataset.do){ const sl=t.dataset.do, n=cnt[sl.toLowerCase()]||0;
+      if(!confirm(`確定要刪除店主「${sl}」嗎？刪除後這個店舖名稱可以重新註冊。`)) return;
+      const withResults = n>0 && confirm(`要一起刪除 ${sl} 的 ${n} 筆顧客紀錄嗎？\n按「確定」一起刪除；按「取消」只刪店主、保留紀錄。`);
+      try{ await api(`/api/admin/owners/${encodeURIComponent(sl)}${withResults?"?results=1":""}`,{method:"DELETE",headers:H}); toast("已刪除店主"); admin(); }catch(x){ toast(x.msg||"刪除失敗"); } }
+  };
+  draw();
 }
 
 function setupLocal(editIx){
@@ -920,6 +969,6 @@ document.addEventListener("keydown",e=>{
   if(k>=0 && k<q.opts.length){ pick(q,k); }
 });
 
-if(!STORE && location.hash==="#owner") setup(); else intro();
+if(!STORE && location.hash==="#admin") admin(); else if(!STORE && location.hash==="#owner") setup(); else intro();
 })();
 </script>

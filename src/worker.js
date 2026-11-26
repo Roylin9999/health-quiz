@@ -244,6 +244,14 @@ async function api(request, env, url, ctx) {
       focus: parse(r.focus, []), recs: parse(r.recommendations, []), answers: parse(r.answers, {}) })) });
   }
 
+  // 店主：刪除自己的一筆顧客紀錄
+  if (m === "DELETE" && (mm = p.match(/^\/api\/owners\/([^/]+)\/results\/(\d+)$/))) {
+    const o = await authOwner(request, env, decodeURIComponent(mm[1]));
+    if (!o) return err(401, "請重新登入");
+    const r = await env.DB.prepare("DELETE FROM results WHERE id = ? AND store = ?").bind(+mm[2], o.slug).run();
+    return json({ ok: true, deleted: r.meta?.changes || 0 });
+  }
+
   // 管理者（Roy）：看全部店主與紀錄，需要密鑰 ADMIN_KEY
   if (m === "GET" && p === "/api/admin/results") {
     if (!isAdmin(request, env)) return err(401, "管理密鑰不正確");
@@ -251,6 +259,22 @@ async function api(request, env, url, ctx) {
       "SELECT id, store, customer, focus, recommendations, emailed, created_at FROM results ORDER BY created_at DESC LIMIT 1000").all();
     const owners = (await env.DB.prepare("SELECT slug, credit_user, email, line_id, created_at FROM owners ORDER BY created_at").all()).results;
     return json({ ok: true, owners, results });
+  }
+
+  // 管理者：刪除店主（?results=1 連同他的顧客紀錄一起刪）
+  if (m === "DELETE" && (mm = p.match(/^\/api\/admin\/owners\/([^/]+)$/))) {
+    if (!isAdmin(request, env)) return err(401, "管理密鑰不正確");
+    const slug = decodeURIComponent(mm[1]);
+    const r = await env.DB.prepare("DELETE FROM owners WHERE slug = ?").bind(slug).run();
+    let removed = 0;
+    if (url.searchParams.get("results") === "1") removed = (await env.DB.prepare("DELETE FROM results WHERE store = ?").bind(slug).run()).meta?.changes || 0;
+    return json({ ok: true, deleted: r.meta?.changes || 0, results: removed });
+  }
+  // 管理者：刪除一筆顧客紀錄
+  if (m === "DELETE" && (mm = p.match(/^\/api\/admin\/results\/(\d+)$/))) {
+    if (!isAdmin(request, env)) return err(401, "管理密鑰不正確");
+    const r = await env.DB.prepare("DELETE FROM results WHERE id = ?").bind(+mm[1]).run();
+    return json({ ok: true, deleted: r.meta?.changes || 0 });
   }
 
   return err(404, "找不到這個 API");
