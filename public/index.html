@@ -344,7 +344,7 @@ footer.note .textlink{font-size:13px}
 .card .rank .label{letter-spacing:.16em}
 .match{font-weight:600}
 .help li{border-radius:999px;padding:5px 13px;font-size:14.5px}
-.why{gap:8px;font-size:15px;line-height:1.65}
+.why{gap:8px;font-size:15px;line-height:1.65}.why li,.rhead .sub{text-wrap:pretty}
 .why li::before{width:6px;height:6px;border-radius:50%;transform:translateY(-3px)}
 .quote{font-size:14.5px;border-top:0;background:var(--bg);border-radius:14px;padding:14px 16px}
 .pfoot{padding-top:4px}
@@ -466,60 +466,60 @@ const Q = [
  {id:"age",title:"你的年齡層是？",hint:"不同年齡的保養重點不太一樣。",opts:[
    {l:"18–29 歲",add:{}},
    {l:"30–44 歲",add:{energy:.5,stress:.5}},
-   {l:"45–59 歲",add:{joint:1,eye:.8,heart:.8,aging:1},why:"45 歲後常見的保養重點"},
-   {l:"60 歲以上",add:{joint:2,heart:1.5,aging:2,eye:1},why:"熟齡族群的日常保養"}]},
+   {l:"45–59 歲",add:{joint:1,eye:.8,heart:.8,aging:1},why:"這個階段的你，更值得被細心照顧"},
+   {l:"60 歲以上",add:{joint:2,heart:1.5,aging:2,eye:1},why:"為熟齡的你，準備更周到的日常保養"}]},
  {id:"goal",multi:3,title:"你的首要健康目標是？",hint:"最多選 3 項，越先選的越優先。",opts:[
    {l:"消化健康",tag:"digest"},{l:"良好睡眠",tag:"sleep"},{l:"循環健康",tag:"heart"},{l:"肌力＆健身",tag:"exercise"},
    {l:"體重管理",tag:"weight"},{l:"能量",tag:"energy"},{l:"體內環保",tag:"detox"},{l:"保護力",tag:"immune"},
    {l:"靈活行動力",tag:"joint"},{l:"舒緩壓力",tag:"stress"},{l:"思緒保健",tag:"focus"},{l:"眼睛保健",tag:"eye"},{l:"肌膚保養",tag:"skin"}]},
  {id:"sym",multi:12,optional:1,title:"最近有感覺到以下哪些變化？",hint:"可以複選；都沒有的話直接按「下一題」。",opts:[
-   {l:"暴飲暴食或對食物的渴望",add:{weight:2.5},why:"最近容易嘴饞、想吃東西"},
-   {l:"頭髮健康",add:{skin:1.5,diet:1},why:"在意頭髮狀態"},
-   {l:"行動力健康",add:{joint:2.5},why:"在意行動力"},
-   {l:"感到疲倦或不安",add:{energy:2,stress:1.5},why:"最近容易疲倦或不安"},
-   {l:"有皮膚問題",add:{skin:2.5},why:"有皮膚方面的困擾"},
-   {l:"肌膚乾燥",add:{skin:1.5,s_dry:3},why:"肌膚容易乾燥"},
-   {l:"偶爾胃部不舒服",add:{digest:2.5},why:"偶爾胃部不舒服"},
-   {l:"頭部不舒服",add:{stress:1.5,sleep:.5},why:"偶爾頭部不舒服"},
-   {l:"腦霧",add:{focus:3},why:"有腦霧、思緒不清的感覺"},
-   {l:"肌肉緊繃",add:{muscle:3},why:"肌肉容易緊繃"},
-   {l:"心跳不規則",add:{heart:1},why:"在意心跳狀況",flag:"heart"},
-   {l:"吃完飯後感覺疲倦",add:{digest:1.5,energy:1},why:"飯後容易疲倦"}]},
+   {l:"暴飲暴食或對食物的渴望",add:{weight:2.5},why:"最近比較容易嘴饞，這很正常，我們幫你顧著"},
+   {l:"頭髮健康",add:{skin:1.5,diet:1},why:"你在意頭髮的狀態，想從營養好好養起"},
+   {l:"行動力健康",add:{joint:2.5},why:"你在意行動力，想讓每一步都輕鬆自在"},
+   {l:"感到疲倦或不安",add:{energy:2,stress:1.5},why:"最近辛苦了，容易疲倦的你需要多一點支持"},
+   {l:"有皮膚問題",add:{skin:2.5},why:"肌膚最近有些小狀況，想溫柔地照顧它"},
+   {l:"肌膚乾燥",add:{skin:1.5,s_dry:3},why:"肌膚容易乾燥，需要多一點滋潤與呵護"},
+   {l:"偶爾胃部不舒服",add:{digest:2.5},why:"偶爾胃不太舒服，想讓腸胃被好好對待"},
+   {l:"頭部不舒服",add:{stress:1.5,sleep:.5},why:"偶爾頭部不太舒服，身體在提醒你該放鬆了"},
+   {l:"腦霧",add:{focus:3},why:"有時覺得思緒不夠清晰，想找回清爽的專注感"},
+   {l:"肌肉緊繃",add:{muscle:3},why:"肌肉容易緊繃，身體想要好好舒展一下"},
+   {l:"心跳不規則",add:{heart:1},why:"你留意著自己的心跳狀況，日常保養也想更安心",flag:"heart"},
+   {l:"吃完飯後感覺疲倦",add:{digest:1.5,energy:1},why:"吃飽後容易想睡，想讓飯後也保持好精神"}]},
  {id:"skin",when:a=>(a.goal||[]).includes(12)||(a.sym||[]).some(k=>k===4||k===5),title:"你最在意的肌膚狀況是？",hint:"因為你提到肌膚，多問一題。",opts:[
-   {l:"暗沉、不夠亮",add:{s_dull:4},why:"在意膚色暗沉"},
-   {l:"細紋、彈性不足",add:{s_lines:4},why:"在意細紋與彈性"},
-   {l:"乾燥、缺水",add:{s_dry:4},why:"肌膚容易乾燥"},
-   {l:"常曬太陽",add:{s_sun:4},why:"日常日曬多"}]},
+   {l:"暗沉、不夠亮",add:{s_dull:4},why:"你希望膚色更透亮，氣色看起來更好"},
+   {l:"細紋、彈性不足",add:{s_lines:4},why:"你在意細紋與彈性，想留住肌膚的緊緻感"},
+   {l:"乾燥、缺水",add:{s_dry:4},why:"肌膚容易乾燥，需要多一點滋潤與呵護"},
+   {l:"常曬太陽",add:{s_sun:4},why:"你常在陽光下活動，肌膚需要更用心的照顧"}]},
  {id:"diet",title:"你平常的飲食比較接近？",opts:[
-   {l:"外食為主，蔬果吃得少",add:{diet:3,digest:1},why:"外食多、蔬果攝取不足"},
-   {l:"常吃甜食、炸物或宵夜",add:{weight:1.5,digest:1.5},why:"飲食偏重口味"},
-   {l:"高蛋白、配合健身",add:{exercise:1.5},why:"有健身飲食習慣"},
+   {l:"外食為主，蔬果吃得少",add:{diet:3,digest:1},why:"忙碌的你常外食，蔬果的營養我們幫你補上"},
+   {l:"常吃甜食、炸物或宵夜",add:{weight:1.5,digest:1.5},why:"偶爾想吃點重口味沒關係，幫身體減輕一些負擔"},
+   {l:"高蛋白、配合健身",add:{exercise:1.5},why:"你對飲食與健身很用心，值得搭配更好的補給"},
    {l:"大致均衡",add:{}}]},
  {id:"move",title:"一週運動幾次？",opts:[
-   {l:"幾乎不運動",add:{weight:1,energy:1},why:"活動量偏少"},
+   {l:"幾乎不運動",add:{weight:1,energy:1},why:"平常比較少活動，先從輕鬆的保養開始"},
    {l:"1–2 次",add:{}},
-   {l:"3 次以上",add:{exercise:3},why:"運動量大，需要補給"}]},
+   {l:"3 次以上",add:{exercise:3},why:"你的運動量很足，身體需要充足的補給"}]},
  {id:"sleep",title:"最近的睡眠狀況？",opts:[
    {l:"一覺到天亮",add:{}},
-   {l:"不容易入睡",add:{sleep:3,stress:1},why:"不容易入睡"},
-   {l:"半夜容易醒",add:{sleep:2.5},why:"睡眠容易中斷"},
-   {l:"睡不到 6 小時",add:{energy:2,sleep:1},why:"睡眠時間不足"}]},
+   {l:"不容易入睡",add:{sleep:3,stress:1},why:"夜裡不容易入睡，希望陪你找回安穩的夜晚"},
+   {l:"半夜容易醒",add:{sleep:2.5},why:"半夜容易醒來，希望你的夜晚能更安穩"},
+   {l:"睡不到 6 小時",add:{energy:2,sleep:1},why:"睡得比較少的你，更需要在白天好好照顧自己"}]},
  {id:"stress",title:"最近的壓力感受？",opts:[
    {l:"輕鬆",add:{}},
    {l:"偶爾緊繃",add:{stress:1.5}},
-   {l:"常常很大",add:{stress:3,energy:1},why:"長期壓力大"}]},
+   {l:"常常很大",add:{stress:3,energy:1},why:"你承擔了很多，辛苦了，該好好寵愛自己"}]},
  {id:"screen",title:"每天看手機、電腦的時間？",opts:[
    {l:"4 小時以內",add:{}},
-   {l:"4–8 小時",add:{eye:1.5},why:"每天看螢幕 4 小時以上"},
-   {l:"8 小時以上",add:{eye:3},why:"每天看螢幕超過 8 小時"}]},
+   {l:"4–8 小時",add:{eye:1.5},why:"每天長時間看螢幕，眼睛需要多一點照顧"},
+   {l:"8 小時以上",add:{eye:3},why:"每天看螢幕超過 8 小時，雙眼真的辛苦了"}]},
  {id:"budget",title:"你比較想從哪種方式開始？",opts:[
    {l:"先試單品",sub:"NT$1,500 以內為主",b:"single"},
    {l:"直接用組合方案",sub:"一次搭配好",b:"kit"},
    {l:"看推薦再決定",b:"any"}]}
 ];
 
-const GOAL_WHY = {energy:"你想改善精神與活力",sleep:"你想改善睡眠",stress:"你想好好放鬆、紓解壓力",weight:"你想做體重管理",
-  digest:"你想讓消化更順暢",immune:"你想加強日常保護力",joint:"你在意關節與行動",eye:"你的眼睛容易疲勞",skin:"你在意肌膚狀態",heart:"你想保養循環",exercise:"你想加強肌力與健身",detox:"你想做體內環保",focus:"你想保養思緒、提升專注"};
+const GOAL_WHY = {energy:"你希望每天都神采奕奕，這是為你準備的活力補給",sleep:"你想好好睡一覺，讓身體在夜裡安心休息",stress:"你值得好好放鬆，把緊繃的心慢慢放下來",weight:"你想維持輕盈的體態，我們陪你一步一步來",
+  digest:"你希望消化更順暢，讓身體每天都輕鬆自在",immune:"你想為自己多添一層日常的守護",joint:"你希望行動一直靈活自在，想去哪就去哪",eye:"你的雙眼每天都很辛苦，值得多一點呵護",skin:"你在意肌膚的狀態，想由內而外透出好氣色",heart:"你重視循環保養，想讓身體保持順暢有活力",exercise:"你認真鍛鍊自己，值得更好的營養後盾",detox:"你想讓身體清爽無負擔，從體內環保開始",focus:"你希望思緒清晰，做事更專注從容"};
 
 /* packaging shape per product, used for the illustrated tiles */
 const FORM = {
@@ -1027,7 +1027,7 @@ function score(){
 function reasons(r,why){
   const out=[];
   for(const [tag] of r.contrib){ for(const w of (why[tag]||[])){ if(!out.includes(w)) out.push(w); if(out.length>=2) break;} if(out.length>=2) break; }
-  if(!out.length) out.push(`對應你的「${NEED[r.main]}」需求`);
+  if(!out.length) out.push(`貼近你在「${NEED[r.main]}」上的需要`);
   return out;
 }
 
@@ -1057,10 +1057,10 @@ function result(){
   const nmax = R.needs[0]?.[1]||1;
   const [a,...others] = R.picks;
   const body = (r,ix,big)=>`<div class="pbody">
-      <div class="rank"><span class="label">${ix===0?"首選推薦":"推薦 0"+(ix+1)}</span><span class="match"><span class="cu" data-v="${pct(r,R)}">${pct(r,R)}</span>%<small>符合</small></span></div>
+      <div class="rank"><span class="label">${ix===0?"為你首選":"推薦 0"+(ix+1)}</span><span class="match"><span class="cu" data-v="${pct(r,R)}">${pct(r,R)}</span>%<small>符合</small></span></div>
       <div><div class="pname">${esc(r.p.n)}</div><div class="vendor">${esc(r.p.v)}${r.p.kit?"・組合方案":""}</div></div>
-      ${r.p.b&&r.p.b.length?`<div class="help"><span class="hl">能幫你</span><ul>${r.p.b.slice(0,big?4:3).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
-      <div class="whyw"><span class="hl">為什麼推薦給你</span><ul class="why">${reasons(r,R.why).map(w=>`<li>${esc(w)}</li>`).join("")}</ul></div>
+      ${r.p.b&&r.p.b.length?`<div class="help"><span class="hl">它能為你做的</span><ul>${r.p.b.slice(0,big?4:3).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
+      <div class="whyw"><span class="hl">為你挑選的原因</span><ul class="why">${reasons(r,R.why).map(w=>`<li>${esc(w)}</li>`).join("")}</ul></div>
       ${big?`<p class="quote">「${esc(r.p.d)}」<br><span class="vendor" style="font-family:var(--f-sans)">官網介紹</span></p>`:""}
       <div class="pfoot"><span class="price">${money(r.p.p)}<small>起</small></span>
         <a class="btn${big?"":" ghost"}" href="${purl(r.p.h)}" target="_blank" rel="noopener">到官網查看 ${ARROW}</a></div>
@@ -1070,14 +1070,14 @@ function result(){
   app.innerHTML = `<section class="res">
     <div class="rhead">
       <span class="label">YOUR WELLNESS PROFILE</span>
-      <h2 tabindex="-1">${R.needs.length?`先從「${esc(NEED[R.needs[0][0]])}」開始，<br>最容易感受到改變`:"你的狀態不錯，<br>從基礎營養開始就好"}</h2>
+      <h2 tabindex="-1">${R.needs.length?`從「${esc(NEED[R.needs[0][0]])}」開始，<br>好好照顧自己`:"你把自己照顧得很好，<br>從基礎營養開始就好"}</h2>
   ${medals.length?`<div class="medals" aria-label="你的保養重點">${medals.map(([t])=>`<div class="medal"><img src="${medalSrc(t)}" alt="" width="240" height="240"><span>${esc(NEED[t])}</span></div>`).join("")}</div>`:""}
-      <p class="sub">以下是依照你的回答挑選的三樣產品，以及挑選的理由。</p>
+      <p class="sub">謝謝你花時間認識自己。這三樣是依照你的回答，為你用心挑選的。</p>
       ${(ans.sym||[]).includes(10)?`<p class="note">你提到心跳不規則。這類狀況建議先請醫師檢查，保健食品不能取代醫療診斷。</p>`:""}
     </div>
     ${a?`<article class="feature">${tile(a)}${body(a,0,true)}</article>`:""}
     ${others.length?`<div class="pair">${others.map((r,ix)=>`<article class="card">${tile(r)}${body(r,ix+1,false)}</article>`).join("")}</div>`:""}
-    ${R.rest.length?`<div class="more"><h3>也可以考慮</h3>${R.rest.map(r=>`<a href="${purl(r.p.h)}" target="_blank" rel="noopener"><span class="mini" style="${tintStyle(r)}">${art(FORM[r.p.h],"")}</span><span class="mn">${esc(r.p.n)}<span>${esc(NEED[r.main])}</span></span><span class="price">${money(r.p.p)}</span></a>`).join("")}</div>`:""}
+    ${R.rest.length?`<div class="more"><h3>這些也很適合你</h3>${R.rest.map(r=>`<a href="${purl(r.p.h)}" target="_blank" rel="noopener"><span class="mini" style="${tintStyle(r)}">${art(FORM[r.p.h],"")}</span><span class="mn">${esc(r.p.n)}<span>${esc(NEED[r.main])}</span></span><span class="price">${money(r.p.p)}</span></a>`).join("")}</div>`:""}
     ${deal(R)}
     <div class="closing">
       <div class="sync" style="justify-content:space-between">
@@ -1095,7 +1095,7 @@ function result(){
   document.getElementById("ask").onclick=()=>copyText(askText(),"已複製，貼給你的顧問就可以了");
   if(STORE && !record._sent){
     const ms=document.getElementById("ms");
-    const okMsg=()=>{ms.className="status ok";ms.textContent=`已把結果傳送給你的顧問 ${hostName()}，顧問會再跟你聯絡。`};
+    const okMsg=()=>{ms.className="status ok";ms.textContent=`結果已經交到你的顧問 ${hostName()} 手上，接下來會親自為你說明。`};
     const failMsg=()=>{ms.textContent="結果沒有傳送成功。請按「複製我的結果」，再傳給你的顧問。"};
     const qa={}; visible().forEach(q=>{ const v=record.answers[q.id]; if(v&&(!Array.isArray(v)||v.length)) qa[q.title]=v; });
     record._sent=true;
