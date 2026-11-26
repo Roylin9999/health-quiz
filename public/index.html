@@ -974,6 +974,11 @@ document.addEventListener("keydown",e=>{
   if(k>=0 && k<q.opts.length){ pick(q,k); }
 });
 
+/* 隱藏入口：連點三下「健康選品」進總後台（仍然要輸入管理密鑰） */
+(()=>{ const b=document.querySelector(".brand"); if(!b) return; let n=0, t=0;
+  b.style.userSelect="none"; b.style.webkitUserSelect="none";
+  b.addEventListener("click",()=>{ const now=Date.now(); n = now-t<700 ? n+1 : 1; t=now;
+    if(n>=3){ n=0; history.replaceState(null,"",location.pathname+"#admin"); admin(); } }); })();
 if(!STORE && location.hash==="#admin") admin(); else if(!STORE && location.hash==="#owner") setup(); else intro();
 })();
 </script>
