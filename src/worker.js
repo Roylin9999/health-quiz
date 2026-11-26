@@ -82,7 +82,7 @@ async function syncToPlan(env, slug, r) {
   if (!env.SYNC_URL || !env.INBOX_KEY) return false;
   const stores = String(env.SYNC_STORE || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
   if (!stores.includes(String(slug).toLowerCase())) return false;
-  const a = r.answers || {}, pick = k => a[k] == null ? [] : [].concat(a[k]).map(x => clip(x, 30));
+  const a = r.answers || {}, pick = re => { const k = Object.keys(a).find(k => re.test(k)); return k == null || a[k] == null ? [] : [].concat(a[k]).map(x => clip(x, 30)); };   // 用關鍵字找題目，題目文字改了也對得上
   const t = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
   // 同一個 Cloudflare 帳號的 Worker 互相呼叫要走服務繫結 PLAN（直接 fetch workers.dev 會被擋）
   const go = env.PLAN ? (u, o) => env.PLAN.fetch(u, o) : fetch;
@@ -90,7 +90,7 @@ async function syncToPlan(env, slug, r) {
     method: "POST", signal: AbortSignal.timeout(6000),
     headers: { "content-type": "application/json", "x-inbox-key": env.INBOX_KEY },
     body: JSON.stringify({ id: `hq-${slug}-${r.id || Date.now()}`, store: slug, name: r.customer, date: t,
-      age: pick("你的年齡層是？")[0] || "", focus: r.focus, symptoms: pick("最近有感覺到以下哪些變化？"),
+      age: pick(/年齡/)[0] || "", focus: r.focus, symptoms: pick(/變化/),
       products: r.recs.map(x => x.name) })
   });
   return res.ok;
@@ -188,7 +188,7 @@ async function api(request, env, url, ctx) {
     const o = await authOwner(request, env, decodeURIComponent(mm[1]));
     if (!o) return err(401, "請重新登入");
     const data = { _subject: `【健康選品｜${o.display_name || o.slug}】測試信`, _template: "table", _captcha: "false",
-      "店主": o.display_name || o.slug, "店舖": o.slug, "說明": "這是測試信。收到這封信代表顧客的測驗結果可以正常寄到你的信箱。" };
+      "店主": o.display_name || o.slug, "店舖": o.slug, "說明": "這是測試信。收到這封信代表顧客的測驗結果可以正常寄到您的信箱。" };
     const ok = await sendMail(o.email, data, url.origin).catch(() => false);
     return json({ ok: true, sent: ok, mail: ok ? undefined : mailJob(o.email, data) });
   }

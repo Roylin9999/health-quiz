@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>60 秒健康選品</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="回答 9 題，立即得到適合你的保健與保養產品建議。">
+<meta name="description" content="回答 9 題，立即得到適合您的保健與保養產品建議。">
 <meta property="og:title" content="60 秒健康選品">
-<meta property="og:description" content="回答 9 題，立即得到適合你的保健與保養產品建議。">
+<meta property="og:description" content="回答 9 題，立即得到適合您的保健與保養產品建議。">
 <meta property="og:image" content="https://health-quiz.wellstoryhall.com/img/og.jpg">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -417,7 +417,7 @@ const P = [
  {h:"lumiere-de-vie-daily-brightening-broad-spectrum-spf-50",n:"若美芙™極致亮白防曬乳SPF50",v:"Lumière de Vie®",p:1500,img:"38fb73df1463fb58802e913d5f45ed60932c7cf0_5819618twn_en_US.jpg",d:"提供肌膚防禦屏障與細緻呵寵，隔離紫外線。",t:{s_sun:4,s_dull:1}}
 ];
 
-/* "能幫你": short benefit phrases taken from each product's official description and tags */
+/* "能幫您": short benefit phrases taken from each product's official description and tags */
 const BEN = {
  "prime-smart-release-magnesium-tablets":["強健骨骼","放鬆肌肉","幫助入睡","鎂能輔助鈣和鉀的吸收"],
  "gotrim-acts-with-ashwagandha":["南非醉茄：維持好心情","刺五加、紅景天：舒緩疲勞感","西番蓮：幫助放鬆、入睡"],
@@ -463,74 +463,74 @@ const NEED = {
 
 /* Each option adds points to needs, and records a short reason phrase. */
 const Q = [
- {id:"age",title:"請問你目前的年齡層是？",hint:"年齡是挑選時的參考之一，我們也想聽聽你自己在意什麼。",opts:[
+ {id:"age",title:"請問您目前的年齡層是？",hint:"年齡是挑選時的參考之一，我們也想聽聽您自己在意什麼。",opts:[
    {l:"18–29 歲",add:{}},
    {l:"30–44 歲",add:{energy:.5,stress:.5}},
-   {l:"45–59 歲",add:{joint:1,eye:.8,heart:.8,aging:1},why:"這次挑選同時參考了你的年齡與生活習慣，也以你親自選出的保養重點為優先。"},
+   {l:"45–59 歲",add:{joint:1,eye:.8,heart:.8,aging:1},why:"這次挑選同時參考了您的年齡與生活習慣，也以您親自選出的保養重點為優先。"},
    {l:"60 歲以上",add:{joint:2,heart:1.5,aging:2,eye:1},why:"我們參考了熟齡階段常見的保養重點，例如關節、循環與眼睛。"}]},
- {id:"goal",multi:3,title:"現階段，你最想優先照顧哪些方面？",hint:"最多可選 3 項。請先點選你最在意的，我們會依照你選擇的順序推薦。",opts:[
+ {id:"goal",multi:3,title:"現階段，您最想優先照顧哪些方面？",hint:"最多可選 3 項。請先點選您最在意的，我們會依照您選擇的順序推薦。",opts:[
    {l:"消化健康",tag:"digest"},{l:"良好睡眠",tag:"sleep"},{l:"循環健康",tag:"heart"},{l:"肌力＆健身",tag:"exercise"},
    {l:"體重管理",tag:"weight"},{l:"能量",tag:"energy"},{l:"體內環保",tag:"detox"},{l:"保護力",tag:"immune"},
    {l:"靈活行動力",tag:"joint"},{l:"舒緩壓力",tag:"stress"},{l:"思緒保健",tag:"focus"},{l:"眼睛保健",tag:"eye"},{l:"肌膚保養",tag:"skin"}]},
- {id:"sym",multi:12,optional:1,title:"最近，你留意到自己有哪些變化？",hint:"可以選好幾項。如果都沒有，直接點「下一題」就好。",opts:[
-   {l:"暴飲暴食或對食物的渴望",add:{weight:2.5},why:"你提到，有時會特別想吃些東西，或吃得比原先打算的多。挑選時，我們也考量了你真實的飲食日常。"},
-   {l:"頭髮健康",add:{skin:1.5,diet:1},why:"你想好好照顧頭髮，也希望從平日的飲食與營養開始用心。"},
-   {l:"行動力健康",add:{joint:2.5},why:"你在意走路、上下樓時的自在感，因此我們把行動力保養也列入考量。"},
-   {l:"感到疲倦或不安",add:{energy:2,stress:1.5},why:"你提到最近容易疲倦或不安，所以我們也考量了精神補給與放鬆這兩方面。"},
-   {l:"有皮膚問題",add:{skin:2.5},why:"你最近留意到一些肌膚變化，所以我們特別參考了你在意的膚況。"},
-   {l:"肌膚乾燥",add:{skin:1.5,s_dry:3},why:"你提到肌膚容易覺得乾，所以挑選時，我們特別留意了日常保濕。"},
-   {l:"偶爾胃部不舒服",add:{digest:2.5},why:"你提到胃偶爾會不舒服，所以我們把日常的消化保養也列入考量。"},
-   {l:"頭部不舒服",add:{stress:1.5,sleep:.5},why:"你提到偶爾頭部不舒服，所以我們也考量了放鬆與休息方面的保養。如果常常發生，建議請醫師看看。"},
-   {l:"腦霧",add:{focus:3},why:"你提到有時會覺得腦袋昏沉、不容易專心，所以我們把思緒保健列入考量。"},
-   {l:"肌肉緊繃",add:{muscle:3},why:"你提到肌肉容易緊繃，所以我們也考量了肌肉放鬆方面的日常保養。"},
-   {l:"心跳不規則",add:{heart:1},why:"你提到有時會感覺心跳不規則，這項感受建議先和醫師談談。",flag:"heart"},
-   {l:"吃完飯後感覺疲倦",add:{digest:1.5,energy:1},why:"你提到吃完飯後容易累，所以我們也考量了消化與精神補給這兩方面。"}]},
- {id:"skin",when:a=>(a.goal||[]).includes(12)||(a.sym||[]).some(k=>k===4||k===5),title:"說到肌膚，你目前最想照顧的是哪一點？",hint:"剛才你提到了肌膚，我們想多了解一點，幫你挑得更貼近需要。",opts:[
-   {l:"暗沉、不夠亮",add:{s_dull:4},why:"你在意照鏡子時看起來的氣色，這次也把你對肌膚光澤的期待列入挑選重點。"},
-   {l:"細紋、彈性不足",add:{s_lines:4},why:"你特別留意肌膚的細紋與彈性，希望每天保養時，能多照顧這兩個細節。"},
-   {l:"乾燥、缺水",add:{s_dry:4},why:"對你來說，保養後肌膚摸起來柔潤、感覺舒服很重要，因此我們優先考量了保濕。"},
-   {l:"常曬太陽",add:{s_sun:4},why:"你常在陽光下活動，挑選時也把戶外生活裡的肌膚照顧考量進來。"}]},
- {id:"diet",title:"哪一項最接近你平常的飲食習慣？",opts:[
-   {l:"外食為主，蔬果吃得少",add:{diet:3,digest:1},why:"你平常多半在外用餐，有些日子蔬果吃得少，因此這次特別參考了你的飲食習慣。"},
-   {l:"常吃甜食、炸物或宵夜",add:{weight:1.5,digest:1.5},why:"甜食、炸物或宵夜是你飲食的一部分，我們從你平常的吃法出發，考量容易搭配的日常保養。"},
-   {l:"高蛋白、配合健身",add:{exercise:1.5},why:"你已經會配合訓練安排飲食，這次挑選也考量了你原有的營養補給習慣。"},
+ {id:"sym",multi:12,optional:1,title:"最近，您留意到自己有哪些變化？",hint:"可以選好幾項。如果都沒有，直接點「下一題」就好。",opts:[
+   {l:"暴飲暴食或對食物的渴望",add:{weight:2.5},why:"您提到，有時會特別想吃些東西，或吃得比原先打算的多。挑選時，我們也考量了您真實的飲食日常。"},
+   {l:"頭髮健康",add:{skin:1.5,diet:1},why:"您想好好照顧頭髮，也希望從平日的飲食與營養開始用心。"},
+   {l:"行動力健康",add:{joint:2.5},why:"您在意走路、上下樓時的自在感，因此我們把行動力保養也列入考量。"},
+   {l:"感到疲倦或不安",add:{energy:2,stress:1.5},why:"您提到最近容易疲倦或不安，所以我們也考量了精神補給與放鬆這兩方面。"},
+   {l:"有皮膚問題",add:{skin:2.5},why:"您最近留意到一些肌膚變化，所以我們特別參考了您在意的膚況。"},
+   {l:"肌膚乾燥",add:{skin:1.5,s_dry:3},why:"您提到肌膚容易覺得乾，所以挑選時，我們特別留意了日常保濕。"},
+   {l:"偶爾胃部不舒服",add:{digest:2.5},why:"您提到胃偶爾會不舒服，所以我們把日常的消化保養也列入考量。"},
+   {l:"頭部不舒服",add:{stress:1.5,sleep:.5},why:"您提到偶爾頭部不舒服，所以我們也考量了放鬆與休息方面的保養。如果常常發生，建議請醫師看看。"},
+   {l:"腦霧",add:{focus:3},why:"您提到有時會覺得腦袋昏沉、不容易專心，所以我們把思緒保健列入考量。"},
+   {l:"肌肉緊繃",add:{muscle:3},why:"您提到肌肉容易緊繃，所以我們也考量了肌肉放鬆方面的日常保養。"},
+   {l:"心跳不規則",add:{heart:1},why:"您提到有時會感覺心跳不規則，這項感受建議先和醫師談談。",flag:"heart"},
+   {l:"吃完飯後感覺疲倦",add:{digest:1.5,energy:1},why:"您提到吃完飯後容易累，所以我們也考量了消化與精神補給這兩方面。"}]},
+ {id:"skin",when:a=>(a.goal||[]).includes(12)||(a.sym||[]).some(k=>k===4||k===5),title:"說到肌膚，您目前最想照顧的是哪一點？",hint:"剛才您提到了肌膚，我們想多了解一點，幫您挑得更貼近需要。",opts:[
+   {l:"暗沉、不夠亮",add:{s_dull:4},why:"您在意照鏡子時看起來的氣色，這次也把您對肌膚光澤的期待列入挑選重點。"},
+   {l:"細紋、彈性不足",add:{s_lines:4},why:"您特別留意肌膚的細紋與彈性，希望每天保養時，能多照顧這兩個細節。"},
+   {l:"乾燥、缺水",add:{s_dry:4},why:"對您來說，保養後肌膚摸起來柔潤、感覺舒服很重要，因此我們優先考量了保濕。"},
+   {l:"常曬太陽",add:{s_sun:4},why:"您常在陽光下活動，挑選時也把戶外生活裡的肌膚照顧考量進來。"}]},
+ {id:"diet",title:"哪一項最接近您平常的飲食習慣？",opts:[
+   {l:"外食為主，蔬果吃得少",add:{diet:3,digest:1},why:"您平常多半在外用餐，有些日子蔬果吃得少，因此這次特別參考了您的飲食習慣。"},
+   {l:"常吃甜食、炸物或宵夜",add:{weight:1.5,digest:1.5},why:"甜食、炸物或宵夜是您飲食的一部分，我們從您平常的吃法出發，考量容易搭配的日常保養。"},
+   {l:"高蛋白、配合健身",add:{exercise:1.5},why:"您已經會配合訓練安排飲食，這次挑選也考量了您原有的營養補給習慣。"},
    {l:"大致均衡",add:{}}]},
- {id:"move",title:"平常一週裡，你大約會運動幾次？",opts:[
-   {l:"幾乎不運動",add:{weight:1,energy:1},why:"你目前比較少運動，挑選時，我們以容易放進現有作息的保養方式為優先。"},
+ {id:"move",title:"平常一週裡，您大約會運動幾次？",opts:[
+   {l:"幾乎不運動",add:{weight:1,energy:1},why:"您目前比較少運動，挑選時，我們以容易放進現有作息的保養方式為優先。"},
    {l:"1–2 次",add:{}},
-   {l:"3 次以上",add:{exercise:3},why:"你每週運動至少 3 次，我們也把這份規律的訓練習慣列入營養補給的考量。"}]},
- {id:"sleep",title:"最近這段時間，你睡得怎麼樣？",opts:[
+   {l:"3 次以上",add:{exercise:3},why:"您每週運動至少 3 次，我們也把這份規律的訓練習慣列入營養補給的考量。"}]},
+ {id:"sleep",title:"最近這段時間，您睡得怎麼樣？",opts:[
    {l:"一覺到天亮",add:{}},
-   {l:"不容易入睡",add:{sleep:3,stress:1},why:"你提到躺上床後不容易入睡，所以我們把睡前放鬆的保養列為重點。"},
-   {l:"半夜容易醒",add:{sleep:2.5},why:"你提到半夜容易醒來，所以我們把夜間休息的保養列入考量。"},
-   {l:"睡不到 6 小時",add:{energy:2,sleep:1},why:"你最近的睡眠時間不到 6 小時，這次挑選也參考了你目前的作息。"}]},
- {id:"stress",title:"最近，你覺得生活中的壓力大嗎？",opts:[
+   {l:"不容易入睡",add:{sleep:3,stress:1},why:"您提到躺上床後不容易入睡，所以我們把睡前放鬆的保養列為重點。"},
+   {l:"半夜容易醒",add:{sleep:2.5},why:"您提到半夜容易醒來，所以我們把夜間休息的保養列入考量。"},
+   {l:"睡不到 6 小時",add:{energy:2,sleep:1},why:"您最近的睡眠時間不到 6 小時，這次挑選也參考了您目前的作息。"}]},
+ {id:"stress",title:"最近，您覺得生活中的壓力大嗎？",opts:[
    {l:"輕鬆",add:{}},
    {l:"偶爾緊繃",add:{stress:1.5}},
-   {l:"常常很大",add:{stress:3,energy:1},why:"你提到最近壓力常常很大，所以我們優先考量了放鬆與精神補給方面的日常保養。"}]},
- {id:"screen",title:"平常一天裡，你大約有多久在看手機或電腦？",opts:[
+   {l:"常常很大",add:{stress:3,energy:1},why:"您提到最近壓力常常很大，所以我們優先考量了放鬆與精神補給方面的日常保養。"}]},
+ {id:"screen",title:"平常一天裡，您大約有多久在看手機或電腦？",opts:[
    {l:"4 小時以內",add:{}},
-   {l:"4–8 小時",add:{eye:1.5},why:"你每天看螢幕 4 到 8 小時，所以我們也把眼睛的日常保養列入考量。"},
-   {l:"8 小時以上",add:{eye:3},why:"你每天看螢幕的時間達 8 小時以上，因此在這次挑選裡，我們特別留意了眼睛保養。"}]},
- {id:"budget",title:"如果要把保養放進生活裡，你想從哪種方式開始？",opts:[
+   {l:"4–8 小時",add:{eye:1.5},why:"您每天看螢幕 4 到 8 小時，所以我們也把眼睛的日常保養列入考量。"},
+   {l:"8 小時以上",add:{eye:3},why:"您每天看螢幕的時間達 8 小時以上，因此在這次挑選裡，我們特別留意了眼睛保養。"}]},
+ {id:"budget",title:"如果要把保養放進生活裡，您想從哪種方式開始？",opts:[
    {l:"先試單品",sub:"NT$1,500 以內為主",b:"single"},
    {l:"直接用組合方案",sub:"一次搭配好",b:"kit"},
    {l:"看推薦再決定",b:"any"}]}
 ];
 
-const GOAL_WHY = {energy:"你想有精神地過好每一天，我們把日常營養補給放在優先考量。",
-  sleep:"你想睡得更好，所以我們把睡前放鬆與夜間休息列為挑選重點。",
-  stress:"你想好好放鬆、紓解壓力，所以我們特別留意了放鬆與舒壓方面的日常保養。",
-  weight:"你想照顧自己的體態，挑選時，我們也考量了哪些方式比較容易融入日常。",
-  digest:"你在意每一餐吃完後的感受，所以我們把日常消化保養列入挑選重點。",
-  immune:"你重視日常保護力，所以我們把平時的營養補充列為挑選重點。",
-  joint:"你希望走路、爬樓梯、出門走走都一樣輕鬆自在，所以我們把關節與行動力的保養放在優先考量。",
-  eye:"你想好好照顧眼睛，所以我們把每天用眼後的保養列為挑選重點。",
-  skin:"你留意肌膚每天的樣子，也想找到適合自己、用起來舒服的保養。",
-  heart:"你特別關心循環保養，所以我們把這一項列為挑選重點。",
-  exercise:"你重視肌力與體能，也想替每一次認真練習，好好安排日常營養。",
-  detox:"你選了「體內環保」，希望從每天的飲食與保養著手，更用心地照顧自己。",
-  focus:"你希望思緒清楚、做事專心，所以我們把思緒保健列為挑選重點。"};
+const GOAL_WHY = {energy:"您想有精神地過好每一天，我們把日常營養補給放在優先考量。",
+  sleep:"您想睡得更好，所以我們把睡前放鬆與夜間休息列為挑選重點。",
+  stress:"您想好好放鬆、紓解壓力，所以我們特別留意了放鬆與舒壓方面的日常保養。",
+  weight:"您想照顧自己的體態，挑選時，我們也考量了哪些方式比較容易融入日常。",
+  digest:"您在意每一餐吃完後的感受，所以我們把日常消化保養列入挑選重點。",
+  immune:"您重視日常保護力，所以我們把平時的營養補充列為挑選重點。",
+  joint:"您希望走路、爬樓梯、出門走走都一樣輕鬆自在，所以我們把關節與行動力的保養放在優先考量。",
+  eye:"您想好好照顧眼睛，所以我們把每天用眼後的保養列為挑選重點。",
+  skin:"您留意肌膚每天的樣子，也想找到適合自己、用起來舒服的保養。",
+  heart:"您特別關心循環保養，所以我們把這一項列為挑選重點。",
+  exercise:"您重視肌力與體能，也想替每一次認真練習，好好安排日常營養。",
+  detox:"您選了「體內環保」，希望從每天的飲食與保養著手，更用心地照顧自己。",
+  focus:"您希望思緒清楚、做事專心，所以我們把思緒保健列為挑選重點。"};
 
 /* packaging shape per product, used for the illustrated tiles */
 const FORM = {
@@ -611,13 +611,13 @@ function intro(){
       <img class="art" src="img/hero-art.webp?v=2" alt="新藝術風格插畫：手持草本精華瓶的女子" width="900" height="977" fetchpriority="high">
       <div class="ptext rise">
         <span class="label">PERSONAL WELLNESS CONSULTATION</span>
-        <h1>你想先照顧<br>自己的哪一面？</h1>
-        <p class="lead">從你的作息、飲食，聊到你最在意的小事。答完後，你會看到為你挑選的三樣保養選品，以及每一樣入選的理由。</p>
-        ${STORE?`<p class="host">這次陪你挑選的健康顧問是 <b class="hostname">${esc(hostName())}</b></p>
-        <div class="field"><label for="cname">你的姓名</label><input id="cname" autocomplete="name" maxlength="30" value="${esc(custName)}" placeholder="例如：王小明"><span class="err" id="cerr"></span>
-        <p class="note">請填寫你的姓名。完成問卷後，你的姓名與結果會傳給這位顧問，方便對方依照你的回答，為你說明每一樣選品。</p></div>`:""}
+        <h1>您想先照顧<br>自己的哪一面？</h1>
+        <p class="lead">從您的作息、飲食，聊到您最在意的小事。答完後，您會看到為您挑選的三樣保養選品，以及每一樣入選的理由。</p>
+        ${STORE?`<p class="host">這次陪您挑選的健康顧問是 <b class="hostname">${esc(hostName())}</b></p>
+        <div class="field"><label for="cname">您的姓名</label><input id="cname" autocomplete="name" maxlength="30" value="${esc(custName)}" placeholder="例如：王小明"><span class="err" id="cerr"></span>
+        <p class="note">請填寫您的姓名。完成問卷後，您的姓名與結果會傳給這位顧問，方便對方依照您的回答，為您說明每一樣選品。</p></div>`:""}
         <button class="btn" id="go">開始我的保養問卷 ${ARROW}</button>
-        <p class="meta"><span>約 <b>60</b>秒</span><i></i><span><b>9</b>道日常提問</span><i></i><span><b>3</b>樣為你挑選的產品</span></p>
+        <p class="meta"><span>約 <b>60</b>秒</span><i></i><span><b>9</b>道日常提問</span><i></i><span><b>3</b>樣為您挑選的產品</span></p>
       </div>
     </div>
   </section>`;
@@ -676,7 +676,7 @@ function ownerFields(o={}, create){
       <input id="uid" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${esc(o.credit_user||"")}" placeholder="C1234567"><span class="err" id="e-uid"></span></div>
     <div class="field"><label for="mail">接收測驗結果的 Email</label>
       <input id="mail" type="email" autocomplete="email" value="${esc(o.email||"")}" placeholder="name@example.com"><span class="err" id="e-mail"></span></div>
-    <div class="field"><label for="line">LINE ID（選填，顧客可以直接用 LINE 找你要優惠）</label>
+    <div class="field"><label for="line">LINE ID（選填，顧客可以直接用 LINE 找您要優惠）</label>
       <input id="line" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(o.line||"")}" placeholder="例如 dkstore 或 @dkstore"><span class="err" id="e-line"></span></div>
     <div class="field"><label for="pw">${create?"設定登入密碼（至少 6 個字）":"新密碼（不改請留空）"}</label>
       <input id="pw" type="password" autocomplete="new-password"><span class="err" id="e-pw"></span></div>`;
@@ -872,7 +872,7 @@ function setupLocal(editIx){
         <input id="uid" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${esc(o.u||"")}" placeholder="C1234567"><span class="err" id="e-uid"></span></div>
       <div class="field"><label for="mail">接收測驗結果的 Email</label>
         <input id="mail" type="email" autocomplete="email" value="${esc(o.m||"")}" placeholder="name@example.com"><span class="err" id="e-mail"></span></div>
-      <div class="field"><label for="line">LINE ID（選填，顧客可以直接用 LINE 找你要優惠）</label>
+      <div class="field"><label for="line">LINE ID（選填，顧客可以直接用 LINE 找您要優惠）</label>
         <input id="line" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(o.l||"")}" placeholder="例如 dkstore 或 @dkstore"><span class="err" id="e-line"></span></div>
       <div class="actions"><button class="btn" type="submit">${editing?"儲存並顯示 QR Code":"儲存並產生 QR Code"} ${ARROW}</button>
         <button class="back" type="button" id="sb">${editing?"取消":"← 回首頁"}</button></div>
@@ -929,9 +929,9 @@ function qrView(o){
   const tm=document.getElementById("tm");
   if(tm) tm.onclick=()=>{
     const st=document.getElementById("ts"); st.className="status"; st.textContent="傳送中…";
-    sendMail(o.m,{_subject:`【健康選品｜${o.s}】測試信`,_template:"table",_captcha:"false","店舖":o.s,"說明":"這是測試信。收到這封信代表顧客的測驗結果可以正常寄到你的信箱。"})
+    sendMail(o.m,{_subject:`【健康選品｜${o.s}】測試信`,_template:"table",_captcha:"false","店舖":o.s,"說明":"這是測試信。收到這封信代表顧客的測驗結果可以正常寄到您的信箱。"})
       .then(()=>{st.className="status ok";st.textContent="已送出。若是第一次使用，請到信箱點「Activate」啟用。"})
-      .catch(()=>{st.textContent="送不出去。請確認網站已放在你自己的網址上（預覽畫面無法寄信），再試一次。"});
+      .catch(()=>{st.textContent="送不出去。請確認網站已放在您自己的網址上（預覽畫面無法寄信），再試一次。"});
   };
   window.scrollTo({top:0}); app.querySelector("h2").focus({preventScroll:true});
 }
@@ -1038,7 +1038,7 @@ function score(){
 function reasons(r,why){
   const out=[];
   for(const [tag] of r.contrib){ for(const w of (why[tag]||[])){ if(!out.includes(w)) out.push(w); if(out.length>=2) break;} if(out.length>=2) break; }
-  if(!out.length) out.push(`這款選品的保養方向，呼應了你在意的「${NEED[r.main]}」。`);
+  if(!out.length) out.push(`這款選品的保養方向，呼應了您在意的「${NEED[r.main]}」。`);
   return out;
 }
 
@@ -1068,10 +1068,10 @@ function result(){
   const nmax = R.needs[0]?.[1]||1;
   const [a,...others] = R.picks;
   const body = (r,ix,big)=>`<div class="pbody">
-      <div class="rank"><span class="label">${ix===0?"優先為你推薦":"為你推薦 0"+(ix+1)}</span><span class="match"><span class="cu" data-v="${pct(r,R)}">${pct(r,R)}</span>%<small>符合</small></span></div>
+      <div class="rank"><span class="label">${ix===0?"優先為您推薦":"為您推薦 0"+(ix+1)}</span><span class="match"><span class="cu" data-v="${pct(r,R)}">${pct(r,R)}</span>%<small>符合</small></span></div>
       <div><div class="pname">${esc(r.p.n)}</div><div class="vendor">${esc(r.p.v)}${r.p.kit?"・組合方案":""}</div></div>
       ${r.p.b&&r.p.b.length?`<div class="help"><span class="hl">這款選品的保養特色</span><ul>${r.p.b.slice(0,big?4:3).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
-      <div class="whyw"><span class="hl">為什麼為你挑這一款</span><ul class="why">${reasons(r,R.why).map(w=>`<li>${esc(w)}</li>`).join("")}</ul></div>
+      <div class="whyw"><span class="hl">為什麼為您挑這一款</span><ul class="why">${reasons(r,R.why).map(w=>`<li>${esc(w)}</li>`).join("")}</ul></div>
       ${big?`<p class="quote">「${esc(r.p.d)}」<br><span class="vendor" style="font-family:var(--f-sans)">官網介紹</span></p>`:""}
       <div class="pfoot"><span class="price">${money(r.p.p)}<small>起</small></span>
         <a class="btn${big?"":" ghost"}" href="${purl(r.p.h)}" target="_blank" rel="noopener">到官網看產品詳情 ${ARROW}</a></div>
@@ -1081,19 +1081,19 @@ function result(){
   app.innerHTML = `<section class="res">
     <div class="rhead">
       <span class="label">YOUR WELLNESS PROFILE</span>
-      <h2 tabindex="-1">${R.needs.length?`為你挑選，<br>從你最在意的「${esc(NEED[R.needs[0][0]])}」開始`:"為你的日常，<br>挑一份簡單的基礎保養"}</h2>
-  ${medals.length?`<div class="medals" aria-label="你的保養重點">${medals.map(([t])=>`<div class="medal"><img src="${medalSrc(t)}" alt="" width="240" height="240"><span>${esc(NEED[t])}</span></div>`).join("")}</div>`:""}
-      <p class="sub">謝謝你分享自己的日常。這三樣選品，是依照你的回答挑出的。每一樣都附上理由，讓你按自己的需要慢慢選。</p>
-      ${(ans.sym||[]).includes(10)?`<p class="note">你提到有心跳不規則的情形，建議先請醫師評估。這份選品結果僅供日常保養參考，無法判斷心跳變化的原因。</p>`:""}
+      <h2 tabindex="-1">${R.needs.length?`為您挑選，<br>從您最在意的「${esc(NEED[R.needs[0][0]])}」開始`:"為您的日常，<br>挑一份簡單的基礎保養"}</h2>
+  ${medals.length?`<div class="medals" aria-label="您的保養重點">${medals.map(([t])=>`<div class="medal"><img src="${medalSrc(t)}" alt="" width="240" height="240"><span>${esc(NEED[t])}</span></div>`).join("")}</div>`:""}
+      <p class="sub">謝謝您分享自己的日常。這三樣選品，是依照您的回答挑出的。每一樣都附上理由，讓您按自己的需要慢慢選。</p>
+      ${(ans.sym||[]).includes(10)?`<p class="note">您提到有心跳不規則的情形，建議先請醫師評估。這份選品結果僅供日常保養參考，無法判斷心跳變化的原因。</p>`:""}
     </div>
     ${a?`<article class="feature">${tile(a)}${body(a,0,true)}</article>`:""}
     ${others.length?`<div class="pair">${others.map((r,ix)=>`<article class="card">${tile(r)}${body(r,ix+1,false)}</article>`).join("")}</div>`:""}
-    ${R.rest.length?`<div class="more"><h3>也為你選了這${R.rest.length===2?"兩":"幾"}款</h3>${R.rest.map(r=>`<a href="${purl(r.p.h)}" target="_blank" rel="noopener"><span class="mini" style="${tintStyle(r)}">${art(FORM[r.p.h],"")}</span><span class="mn">${esc(r.p.n)}<span>${esc(NEED[r.main])}</span></span><span class="price">${money(r.p.p)}</span></a>`).join("")}</div>`:""}
+    ${R.rest.length?`<div class="more"><h3>也為您選了這${R.rest.length===2?"兩":"幾"}款</h3>${R.rest.map(r=>`<a href="${purl(r.p.h)}" target="_blank" rel="noopener"><span class="mini" style="${tintStyle(r)}">${art(FORM[r.p.h],"")}</span><span class="mn">${esc(r.p.n)}<span>${esc(NEED[r.main])}</span></span><span class="price">${money(r.p.p)}</span></a>`).join("")}</div>`:""}
     ${deal(R)}
     <div class="closing">
       <div class="sync" style="justify-content:space-between">
         <span class="label">SHARE</span>
-        <p class="note">${STORE?`<span class="status" id="ms">正在將你的選品結果傳給 ${esc(hostName())}…</span>`:"你可以複製這份結果，留給自己，或分享給想一起討論的顧問或朋友。"}</p>
+        <p class="note">${STORE?`<span class="status" id="ms">正在將您的選品結果傳給 ${esc(hostName())}…</span>`:"您可以複製這份結果，留給自己，或分享給想一起討論的顧問或朋友。"}</p>
         <div class="actions"><button class="btn" id="copy">複製我的結果</button><button class="back" id="again">重新填寫問卷</button></div>
       </div>
     </div>
@@ -1103,11 +1103,11 @@ function result(){
   buzz([10,40,14]);
   document.getElementById("again").onclick=intro;
   document.getElementById("copy").onclick=()=>copy(record);
-  document.getElementById("ask").onclick=()=>copyText(askText(),"已複製，貼給你的顧問就可以了");
+  document.getElementById("ask").onclick=()=>copyText(askText(),"已複製，貼給您的顧問就可以了");
   if(STORE && !record._sent){
     const ms=document.getElementById("ms");
-    const okMsg=()=>{ms.className="status ok";ms.textContent=`你的健康顧問 ${hostName()} 已收到結果。想多了解哪一款，直接問顧問就可以了。`};
-    const failMsg=()=>{ms.textContent="這次未能送出。請點「複製我的結果」，就能把這份選品結果貼給你的顧問。"};
+    const okMsg=()=>{ms.className="status ok";ms.textContent=`您的健康顧問 ${hostName()} 已收到結果。想多了解哪一款，直接問顧問就可以了。`};
+    const failMsg=()=>{ms.textContent="這次未能送出。請點「複製我的結果」，就能把這份選品結果貼給您的顧問。"};
     const qa={}; visible().forEach(q=>{ const v=record.answers[q.id]; if(v&&(!Array.isArray(v)||v.length)) qa[q.title]=v; });
     record._sent=true;
     const legacy=()=>{
@@ -1125,17 +1125,17 @@ function result(){
 }
 
 const DEAL_LINES = [
-  n=>`看到喜歡的選品了嗎？<br>讓 <b>${n}</b> 替你看看，現在有哪些優惠可以用。`,
+  n=>`看到喜歡的選品了嗎？<br>讓 <b>${n}</b> 替您看看，現在有哪些優惠可以用。`,
   n=>`想問優惠，一句話就能開頭：「我做完問卷了，想了解這次推薦的選品。」<br>把這句傳給 <b>${n}</b> 就好。`,
-  n=>`選品有了方向，價格也可以慢慢比較。<br>請 <b>${n}</b> 幫你看看，喜歡的那一款目前有沒有優惠。`
+  n=>`選品有了方向，價格也可以慢慢比較。<br>請 <b>${n}</b> 幫您看看，喜歡的那一款目前有沒有優惠。`
 ];
 function deal(R){
-  const n = STORE ? esc(hostName()) : "介紹你來的顧問";
+  const n = STORE ? esc(hostName()) : "介紹您來的顧問";
   const line = DEAL_LINES[Math.floor(Math.random()*DEAL_LINES.length)](n);
   return `<div class="deal"><img class="art" src="img/deal.webp" alt="" loading="lazy" width="360" height="360"><div class="dtext">
     <span class="label">SPECIAL OFFER</span>
     <p class="dealh">${line}</p>
-    <p class="note">今天先看看也很好。你可以把結果留著，等有興趣或有疑問時，再找${n}聊聊。</p>
+    <p class="note">今天先看看也很好。您可以把結果留著，等有興趣或有疑問時，再找${n}聊聊。</p>
     <div class="actions">
       ${STORE&&STORE.l?`<a class="btn" href="${STORE.l.startsWith("@")?"https://line.me/R/ti/p/"+encodeURIComponent(STORE.l):"https://line.me/ti/p/~"+encodeURIComponent(STORE.l)}" target="_blank" rel="noopener">用 LINE 詢問優惠 ${ARROW}</a>`:""}
       <button class="${STORE&&STORE.l?"btn ghost":"btn"}" id="ask">複製優惠詢問訊息</button>
@@ -1144,12 +1144,12 @@ function deal(R){
 }
 function askText(){
   const r=window.quizResult, top=r?.recommendations?.[0]?.name||"推薦的產品";
-  return `嗨${STORE?" "+hostName():""}～我是${custName||"剛做完保養問卷的朋友"}，我做完問卷了，想了解這次推薦的選品「${top}」，也想請你幫我看看目前有沒有優惠，謝謝你。`;
+  return `嗨${STORE?" "+hostName():""}～我是${custName||"剛做完保養問卷的朋友"}，我做完問卷了，想了解這次推薦的選品「${top}」，也想請您幫我看看目前有沒有優惠，謝謝您。`;
 }
 function copy(rec){
   const txt = `【健康選品 測驗結果】\n保養重點：${rec.focus.join("、")}\n` +
     rec.recommendations.map((r,ix)=>`${ix+1}. ${r.name}（符合 ${r.match}%）\n   ${r.url}`).join("\n");
-  const done=()=>toast("已複製！可以貼到 LINE，分享給你的顧問或朋友。");
+  const done=()=>toast("已複製！可以貼到 LINE，分享給您的顧問或朋友。");
   if(navigator.clipboard?.writeText){ navigator.clipboard.writeText(txt).then(done,()=>fallback(txt)); } else fallback(txt);
 }
 function copyText(txt,msg){ if(navigator.clipboard?.writeText){ navigator.clipboard.writeText(txt).then(()=>toast(msg),()=>fallback(txt)); } else fallback(txt); }
