@@ -782,7 +782,6 @@ function render(){
   setTimer(`QUESTION ${String(i+1).padStart(2,"0")}`);
   const sel = k => q.multi ? (cur||[]).includes(k) : cur===k;
   const last = i===total-1;
-  const showNext = q.multi || cur!==undefined;
   app.innerHTML = `<section class="q fade">
     <div class="prog"><span class="n">${String(i+1).padStart(2,"0")}<small> / ${String(total).padStart(2,"0")}</small></span><div class="bar"><i style="width:${((i+1)/total*100).toFixed(1)}%"></i></div></div>
     <div class="qhead"><h2 id="qt">${esc(q.title)}</h2>${q.hint?`<p class="hint">${esc(q.hint)}</p>`:""}</div>
@@ -791,7 +790,7 @@ function render(){
     </div>
     <div class="nav">
       <button class="back" id="back">← ${i===0?"回首頁":"上一題"}</button>
-      ${showNext?`<button class="btn" id="next" ${q.multi&&!q.optional&&!(cur||[]).length?"disabled":""}>${last?"查看我的結果":"下一題"} ${ARROW}</button>`:""}
+      <button class="btn" id="next" ${q.multi?(!q.optional&&!(cur||[]).length?"disabled":""):(cur===undefined?"disabled":"")}>${last?"查看我的結果":"下一題"} ${ARROW}</button>
     </div>
   </section>`;
   app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(q,+b.dataset.k));
@@ -809,8 +808,8 @@ function pick(q,k){
     render();
     const b=app.querySelector(`.opt[data-k="${k}"]`); if(b) b.focus({preventScroll:true});
   } else {
-    ans[q.id]=k; render();
-    setTimeout(()=>go(i+1),220);
+    ans[q.id]=k; render();   /* 每一題都一樣：選好後按「下一題」，不自動跳頁 */
+    const b=app.querySelector(`.opt[data-k="${k}"]`); if(b) b.focus({preventScroll:true});
   }
 }
 
