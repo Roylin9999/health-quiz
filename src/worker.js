@@ -277,7 +277,7 @@ async function api(request, env, url, ctx) {
   if (m === "GET" && p === "/api/admin/results") {
     if (!isAdmin(request, env)) return err(401, "管理密鑰不正確");
     const { results } = await env.DB.prepare(
-      "SELECT id, store, customer, focus, recommendations, emailed, created_at FROM results ORDER BY created_at DESC LIMIT 1000").all();
+      "SELECT id, store, customer, focus, recommendations, answers, emailed, created_at FROM results ORDER BY created_at DESC LIMIT 1000").all();
     const owners = (await env.DB.prepare("SELECT slug, display_name, credit_user, email, line_id, created_at FROM owners ORDER BY created_at").all()).results;
     return json({ ok: true, owners, results });
   }

@@ -360,6 +360,30 @@ footer.note .textlink{font-size:13px}
 @media (max-width:560px){.deal{grid-template-columns:1fr;text-align:center}.deal .art{max-width:112px}.deal .actions{justify-content:center}.deal .actions .btn{width:100%}}
 .sync{border:0;background:var(--paper);box-shadow:0 0 0 1px var(--hair);padding:22px;gap:12px}
 .actions{gap:14px}
+
+/* 顧客紀錄卡片（店主專區、總後台） */
+.rcards{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.rcard{background:var(--paper);border-radius:16px;box-shadow:0 0 0 1px var(--hair);overflow:hidden}
+.rcard[open]{box-shadow:0 0 0 1px var(--gold),var(--shadow)}
+.rcard summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) 20px;gap:12px;align-items:center;padding:14px 16px;transition:background .2s}
+.rcard summary::-webkit-details-marker{display:none}
+.rcard summary:active{background:var(--gold-soft)}
+.rc-main{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rc-main b{font:600 17px/1.35 var(--f-serif);overflow-wrap:anywhere}
+.rc-sub{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.rc-top{font-size:13.5px;line-height:1.5;color:var(--muted);min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.chev{width:9px;height:9px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:rotate(45deg);justify-self:center;margin-top:-4px;transition:transform .25s var(--ease)}
+.rcard[open] .chev{transform:rotate(-135deg);margin-top:4px}
+.rc-body{display:flex;flex-direction:column;gap:16px;padding:4px 16px 16px;border-top:1px solid var(--hair);padding-top:14px;animation:rise .35s var(--ease) both}
+.help-ul{margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.help-ul li{list-style:none;background:var(--moss-soft);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:500}
+.rc-recs{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.55}
+.rc-recs a{color:var(--moss);text-underline-offset:3px}
+.rc-recs .num{display:block;font-size:12.5px;color:var(--muted)}
+.rc-qa{margin:0;display:flex;flex-direction:column}
+.rc-qa dt{font-size:13px;color:var(--muted);line-height:1.5;padding-top:10px;border-top:1px solid var(--hair)}
+.rc-qa dt:first-child{border-top:0;padding-top:0}
+.rc-qa dd{margin:2px 0 10px;font-size:15.5px;font-weight:500;line-height:1.55}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -631,6 +655,20 @@ function intro(){
   else ownerLink();
 }
 
+/* 一筆顧客紀錄：點開可以看每一題的作答與三樣推薦 */
+function recCard(r,delAttr,showStore){
+  const J=(v,d)=>{ try{ return JSON.parse(v||"")||d }catch(e){ return d } };
+  const f=J(r.focus,[]), rc=J(r.recommendations,[]), an=J(r.answers,{});
+  const qa=Object.entries(an).filter(([,v])=>v!=null&&(!Array.isArray(v)||v.length));
+  return `<details class="rcard"><summary><span class="rc-main"><b>${esc(r.customer||"（未填姓名）")}</b><span class="rc-sub">${fmtTime(r.created_at)}${showStore&&r.store?"・"+esc(r.store):""}</span></span>
+      <span class="rc-top">${esc(rc[0]?.name||f[0]||"")}</span><i class="chev" aria-hidden="true"></i></summary>
+    <div class="rc-body">
+      ${f.length?`<div><span class="hl">保養重點</span><ul class="help-ul">${f.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
+      ${rc.length?`<div><span class="hl">推薦產品</span><ol class="rc-recs">${rc.map(x=>`<li>${/^https:\/\//.test(x.url||"")?`<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>`:esc(x.name)}${x.match?`<span class="num">符合 ${esc(x.match)}%</span>`:""}</li>`).join("")}</ol></div>`:""}
+      ${qa.length?`<div><span class="hl">作答內容</span><dl class="rc-qa">${qa.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(Array.isArray(v)?v.join("、"):v)}</dd>`).join("")}</dl></div>`:`<p class="note">這筆紀錄沒有留下作答內容。</p>`}
+      <div class="actions"><button class="textlink" data-${delAttr}="${r.id}" data-name="${esc(r.customer)}">刪除這筆紀錄</button></div>
+    </div></details>`;
+}
 function ownerLink(){
   const f=document.querySelector("footer.note"); let b=document.getElementById("ownerbtn");
   if(!b){ b=document.createElement("button"); b.id="ownerbtn"; b.className="textlink"; b.textContent="店主專區：管理店主與 QR Code";
@@ -793,9 +831,7 @@ async function dashboard(sess, owner){
     const {results}=await api(`/api/owners/${encodeURIComponent(owner.slug)}/results`,{headers:authH(sess.token)});
     const box=document.getElementById("rlist");
     if(!results.length){ box.innerHTML=`<p class="hint" style="padding-top:12px">還沒有顧客做測驗。把 QR Code 給顧客掃描後，紀錄會出現在這裡。</p>`; }
-    else box.innerHTML=`<p class="note" style="padding-top:10px">共 ${results.length} 筆</p><div class="rtable-wrap"><table class="rtable"><thead><tr><th>時間</th><th>顧客</th><th>保養重點</th><th>首選推薦</th><th></th></tr></thead><tbody>${
-      results.map(r=>{ let f=[],rc=[]; try{f=JSON.parse(r.focus||"[]");rc=JSON.parse(r.recommendations||"[]")}catch(e){}
-        return `<tr><td class="num">${fmtTime(r.created_at)}</td><td>${esc(r.customer)}</td><td>${esc(f.slice(0,2).join("、"))}</td><td>${rc[0]?(/^https:\/\//.test(rc[0].url)?`<a href="${esc(rc[0].url)}" target="_blank" rel="noopener">${esc(rc[0].name)}</a>`:esc(rc[0].name)):""}</td><td><button class="textlink" data-del="${r.id}" data-name="${esc(r.customer)}">刪除</button></td></tr>`;}).join("")}</tbody></table></div>`;
+    else box.innerHTML=`<p class="note" style="padding-top:10px">共 ${results.length} 筆，點一下顧客就能看完整的作答與推薦。</p><div class="rcards">${results.map(r=>recCard(r,"del")).join("")}</div>`;
     box.onclick=async e=>{ const b=e.target.closest("[data-del]"); if(!b) return;
       if(!confirm(`確定要刪除「${b.dataset.name}」這筆測驗紀錄嗎？刪除後無法復原。`)) return;
       try{ await api(`/api/owners/${encodeURIComponent(owner.slug)}/results/${b.dataset.del}`,{method:"DELETE",headers:authH(sess.token)}); toast("已刪除"); dashboard(sess, owner); }
@@ -823,13 +859,12 @@ async function admin(){
     app.innerHTML=`<section class="setup"><p class="hint">${x.code==="noapi"?"找不到後端，請在正式網址開啟。":esc(x.msg||"讀取失敗")}</p></section>`; return; }
   const cnt={}; d.results.forEach(r=>{ const k=(r.store||"（無店舖）").toLowerCase(); cnt[k]=(cnt[k]||0)+1; });
   let filter="";
-  const rows=()=>d.results.filter(r=>!filter||(r.store||"").toLowerCase()===filter).map(r=>{ let f=[],rc=[]; try{f=JSON.parse(r.focus||"[]");rc=JSON.parse(r.recommendations||"[]")}catch(e){}
-    return `<tr><td class="num">${fmtTime(r.created_at)}</td><td>${esc(r.store||"")}</td><td>${esc(r.customer)}</td><td>${esc(f.slice(0,2).join("、"))}</td><td>${esc(rc[0]?.name||"")}</td><td><button class="textlink" data-dr="${r.id}" data-name="${esc(r.customer)}">刪除</button></td></tr>`; }).join("");
+  const rows=()=>d.results.filter(r=>!filter||(r.store||"").toLowerCase()===filter).map(r=>recCard(r,"dr",true)).join("");
   const draw=()=>{
     app.innerHTML=`<section class="setup fade"><span class="label">ADMIN</span><h2 tabindex="-1">總後台</h2>
       <div class="olist"><h3>店主（${d.owners.length}）</h3><div class="rtable-wrap"><table class="rtable"><thead><tr><th>店舖</th><th>Email</th><th>會員編號</th><th>顧客數</th><th>建立</th><th></th></tr></thead><tbody>${
         d.owners.map(o=>`<tr><td><button class="textlink" data-f="${esc(o.slug)}">${esc(o.slug)}</button>${o.display_name?`<br><small>${esc(o.display_name)}</small>`:""}</td><td>${esc(o.email)}</td><td>${esc(o.credit_user||"")}</td><td class="num">${cnt[o.slug.toLowerCase()]||0}</td><td class="num">${fmtTime(o.created_at)}</td><td><button class="textlink" data-do="${esc(o.slug)}">刪除</button></td></tr>`).join("")||`<tr><td colspan="6">還沒有店主</td></tr>`}</tbody></table></div></div>
-      <div class="olist"><h3>顧客測驗紀錄${filter?`・${esc(filter)}　<button class="textlink" data-f="">看全部</button>`:""}</h3><div class="rtable-wrap"><table class="rtable"><thead><tr><th>時間</th><th>店舖</th><th>顧客</th><th>保養重點</th><th>首選推薦</th><th></th></tr></thead><tbody>${rows()||`<tr><td colspan="6">沒有紀錄</td></tr>`}</tbody></table></div></div>
+      <div class="olist"><h3>顧客測驗紀錄${filter?`・${esc(filter)}　<button class="textlink" data-f="">看全部</button>`:""}</h3><div class="rcards">${rows()||`<p class="hint" style="padding-top:12px">沒有紀錄</p>`}</div></div>
       <p class="note">刪除只會刪掉這個網站裡的資料。已經送進蘇打餅名單的顧客，要到蘇打餅的名單裡另外刪除。</p>
       <div class="actions"><button class="textlink" id="ax">登出總後台</button></div></section>`;
     app.querySelector("section").onclick=handler;
